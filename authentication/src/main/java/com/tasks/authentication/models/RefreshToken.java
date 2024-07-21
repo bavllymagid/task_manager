@@ -1,9 +1,7 @@
-package com.tasks.management.models;
+package com.tasks.authentication.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
