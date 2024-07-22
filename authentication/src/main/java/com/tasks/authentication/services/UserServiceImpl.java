@@ -73,4 +73,9 @@ public class UserServiceImpl implements UserService{
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getRefreshToken();
     }
+
+    @Override
+    public void chooseRole(UserDto userDto, String role) throws UserAlreadyExistsException {
+        createUser(userDto, role);
+    }
 }

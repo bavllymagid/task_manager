@@ -25,13 +25,19 @@ public class AuthController {
 
     @PostMapping("/api/users/register")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto user) throws UserAlreadyExistsException {
-        userService.createUser(user, Roles.USER.name());
+        userService.chooseRole(user, Roles.USER.name());
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("/api/users/login")
     public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException {
         return ResponseEntity.ok(userService.authenticateUser(user.getEmail(), user.getPassword()));
+    }
+
+    @PostMapping("/api/admin/register")
+    public ResponseEntity<UserDto> createAdmin(@RequestBody UserDto user) throws UserAlreadyExistsException {
+        userService.chooseRole(user, Roles.ADMIN.name());
+        return ResponseEntity.ok(user);
     }
 
 

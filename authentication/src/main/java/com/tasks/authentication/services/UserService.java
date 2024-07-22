@@ -11,4 +11,5 @@ import java.util.Map;
 public interface UserService {
     void createUser(UserDto user, String role) throws UserAlreadyExistsException;
     LoginDto authenticateUser(String email, String password) throws AuthenticationFailedException;
+    public void chooseRole(UserDto userDto, String role) throws UserAlreadyExistsException;
 }
