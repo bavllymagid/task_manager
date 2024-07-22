@@ -1,8 +1,6 @@
 package com.tasks.authentication.services;
 
-import com.tasks.authentication.models.User;
 import com.tasks.authentication.repositories.UserRepository;
-import com.tasks.authentication.utils.Roles;
 import com.tasks.authentication.utils.exceptions.AuthenticationFailedException;
 import com.tasks.authentication.utils.exceptions.TokenValidationException;
 import com.tasks.authentication.utils.exceptions.UserAlreadyExistsException;
@@ -21,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -89,7 +86,7 @@ public class UserServiceImpl implements UserService{
         throw new RuntimeException("Failed to register user: " + e.getMessage(), e);
     }
 
-    private Map<String, Object> sendPostRequest(String url, Map<String, Object> body) {
+    private Map sendPostRequest(String url, Map<String, Object> body) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -142,22 +139,32 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Map<String, Object> authenticateUser(String email, String password) throws AuthenticationFailedException {
-        Map<String, String> body = new HashMap<>();
-        body.put("grant_type", "password");
+        String authUrl = "https://" + domain + "/oauth/token";
+        Map<String, Object> body = new HashMap<>();
+        body.put("grant_type", "client_credentials");
         body.put("client_id", managementApiClientId);
         body.put("client_secret", managementApiClientSecret);
         body.put("username", email);
         body.put("password", password);
         body.put("audience", audience);
 
-        String authUrl = "https://" + domain + "/oauth/token";
-
         try {
-            return new RestTemplate().postForObject(authUrl, body, Map.class);
-        } catch (Exception e) {
+            Map response = sendPostRequest(authUrl, body);
+
+            if (response != null && response.containsKey("access_token")) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("token", response.get("access_token"));
+                return result;
+            } else {
+                throw new AuthenticationFailedException("Authentication failed: No access token found in response.");
+            }
+        } catch (HttpClientErrorException e) {
+            log.debug("Error during user authentication: {}", e.getResponseBodyAsString());
             throw new AuthenticationFailedException("Authentication failed: " + e.getMessage());
         }
     }
+
+
 
     @Override
     public boolean validateToken(String token) throws TokenValidationException {

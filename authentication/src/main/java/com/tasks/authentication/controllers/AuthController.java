@@ -35,6 +35,6 @@ public class AuthController {
 
     @PostMapping("/api/users/login")
     public ResponseEntity<String> authenticateUser(@RequestBody LoginUser user) throws AuthenticationFailedException {
-        return ResponseEntity.ok(userService.authenticateUser(user.getEmail(), user.getPassword()).toString());
+        return ResponseEntity.ok(userService.authenticateUser(user.getEmail(), user.getPassword()).get("token").toString());
     }
 }
