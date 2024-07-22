@@ -1,16 +1,14 @@
 package com.tasks.authentication.security;
 
-import com.tasks.authentication.models.User;
-import com.tasks.authentication.repositories.UserRepository;
 import com.tasks.authentication.security.jwt.JwtAuthenticationFilter;
-import com.tasks.authentication.utils.Roles;
+import com.tasks.authentication.models.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,12 +34,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/admin/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/validate").hasAnyRole(Roles.ADMIN.name(), Roles.USER.name())
+                                .requestMatchers(HttpMethod.POST, "/api/token/validate").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/token/refresh").hasAnyRole(Roles.ADMIN.name(), Roles.USER.name())
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic();
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

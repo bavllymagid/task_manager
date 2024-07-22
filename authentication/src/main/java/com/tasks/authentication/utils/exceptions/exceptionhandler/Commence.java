@@ -1,4 +1,4 @@
-package com.tasks.authentication.utils;
+package com.tasks.authentication.utils.exceptions.exceptionhandler;
 
 import com.tasks.authentication.utils.payload.CommenceMessage;
 import org.springframework.http.HttpStatus;

@@ -22,4 +22,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
             throw new TokenValidationException("Invalid refresh token");
         }
     }
+
+    @Override
+    public boolean validateToken(String token) throws TokenValidationException {
+        if(jwtUtil.validateToken(token) != null) {
+            return true;
+        } else {
+            throw new TokenValidationException("Invalid token");
+        }
+    }
 }

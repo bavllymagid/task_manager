@@ -6,6 +6,7 @@ import com.tasks.authentication.repositories.RefreshTokenRepository;
 import com.tasks.authentication.repositories.UserRepository;
 import com.tasks.authentication.utils.exceptions.AuthenticationFailedException;
 import com.tasks.authentication.utils.exceptions.UserAlreadyExistsException;
+import com.tasks.authentication.utils.exceptions.UserNotFound;
 import com.tasks.authentication.utils.jwt.JwtUtil;
 import com.tasks.authentication.utils.payload.LoginDto;
 import com.tasks.authentication.utils.payload.UserDto;
@@ -64,7 +65,6 @@ public class UserServiceImpl implements UserService{
     }
 
     private String storeRefreshToken(User user){
-
         RefreshToken refreshToken = refreshTokenRepository.findByUserId(user.getId()).orElse(new RefreshToken());
         refreshToken.setUser(user);
         refreshToken.setRefreshToken(jwtUtil.generateRefreshToken(user.getEmail()));
@@ -78,4 +78,27 @@ public class UserServiceImpl implements UserService{
     public void chooseRole(UserDto userDto, String role) throws UserAlreadyExistsException {
         createUser(userDto, role);
     }
+
+    @Override
+    public void deleteUser(String email) throws UserNotFound {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFound("User with email " + email + " not found.");
+        }
+        userRepository.delete(user.get());
+        refreshTokenRepository.delete(refreshTokenRepository.findByUserId(user.get().getId()).get());
+    }
+
+    @Override
+    public UserDto updateUser(UserDto userDto) throws UserNotFound {
+        Optional<User> user = userRepository.findByEmail(userDto.getEmail());
+        if (user.isEmpty()) {
+            throw new UserNotFound("User with email " + userDto.getEmail() + " not found.");
+        }
+        user.get().setUsername(userDto.getUsername());
+        user.get().setPassword(passwordEncoder.encode(userDto.getPassword()));
+        userRepository.save(user.get());
+        return userDto;
+    }
+
 }
