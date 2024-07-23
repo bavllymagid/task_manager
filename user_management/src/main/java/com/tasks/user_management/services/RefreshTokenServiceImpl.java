@@ -75,4 +75,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         return refreshTokenRepository.findByUserEmail(jwt.getSubject()).get().getSecretToken();
     }
 
+    @Override
+    public User getUserFromToken(String token) {
+        return userRepository.findByEmail(JWT.decode(token).getSubject()).get();
+    }
+
 }

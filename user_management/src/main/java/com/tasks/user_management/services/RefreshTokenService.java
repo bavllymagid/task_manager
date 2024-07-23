@@ -9,4 +9,5 @@ public interface RefreshTokenService {
     boolean validateToken(String token) throws TokenValidationException;
     RefreshToken createRefreshToken(User user);
     String getSecretFromEmail(String token);
+    User getUserFromToken(String token);
 }
