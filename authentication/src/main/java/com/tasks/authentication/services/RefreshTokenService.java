@@ -8,5 +8,4 @@ import com.tasks.authentication.utils.payload.UserDto;
 public interface RefreshTokenService {
     String refreshAccessToken(String refreshToken) throws TokenValidationException;
     boolean validateToken(String token) throws TokenValidationException;
-    TokenDto getRefToken(UserDto user) throws TokenValidationException;
 }

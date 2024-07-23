@@ -49,17 +49,4 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         }
     }
 
-
-    @Override
-    public TokenDto getRefToken(UserDto user) throws TokenValidationException {
-        Optional<User> u = userRepository.findByEmail(user.getEmail());
-        try {
-            Optional<RefreshToken> token = refreshTokenRepository.findByUserId(u.get().getId());
-            token.get().setRefreshToken(jwtUtil.generateToken(user.getEmail()));
-            refreshTokenRepository.save(token.get());
-            return new TokenDto(token.get().getRefreshToken());
-        } catch (Exception e){
-            throw new TokenValidationException("Token not found");
-        }
-    }
 }
