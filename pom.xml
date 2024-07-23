@@ -15,8 +15,8 @@
 	<description>Demo project for Spring Boot</description>
 	<packaging>pom</packaging>
 	<modules>
-		<module>authentication</module>
-		<module>management</module>
+		<module>user_management</module>
+		<module>task_management</module>
 	</modules>
 	<url/>
 	<licenses>
