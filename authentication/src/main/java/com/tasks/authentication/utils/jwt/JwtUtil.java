@@ -14,31 +14,18 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final Algorithm algorithm;
-    private final JWTVerifier verifier;
-
-    public JwtUtil(@Value("${jwt.secretKey}") String secret) {
-        this.algorithm = Algorithm.HMAC256(secret);
-        this.verifier = JWT.require(this.algorithm).build();
-    }
-
-    public String generateToken(String email) {
+    public String generateToken(String email, Date expirationDate, String secret) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
                 .withSubject(email)
                 .withIssuedAt(new Date(System.currentTimeMillis()))
-                .withExpiresAt(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .withExpiresAt(expirationDate) // set expiration date
                 .sign(algorithm);
     }
 
-    public String generateRefreshToken(String email) {
-        return JWT.create()
-                .withSubject(email)
-                .withIssuedAt(new Date(System.currentTimeMillis()))
-                .withExpiresAt(new Date(System.currentTimeMillis() + 2592000000L)) // 30 days
-                .sign(algorithm);
-    }
-
-    public String validateToken(String token) {
+    public String validateToken(String token, String secret) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        JWTVerifier verifier = JWT.require(algorithm).build();
         try {
             DecodedJWT jwt = verifier.verify(token);
             return jwt.getSubject();

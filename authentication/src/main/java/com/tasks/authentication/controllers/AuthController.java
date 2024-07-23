@@ -9,9 +9,7 @@ import com.tasks.authentication.utils.payload.LoginDto;
 import com.tasks.authentication.utils.payload.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -41,12 +39,12 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/api/users/update")
+    @PutMapping("/api/users/update")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) throws UserNotFound {
         return ResponseEntity.ok(userService.updateUser(user));
     }
 
-    @PostMapping("/api/users/delete")
+    @DeleteMapping("/api/users/delete")
     public ResponseEntity<String> deleteUser(@RequestBody UserDto user) throws UserNotFound {
         userService.deleteUser(user.getEmail());
         return ResponseEntity.ok("User deleted successfully.");

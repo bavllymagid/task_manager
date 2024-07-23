@@ -20,6 +20,12 @@ public class RefreshToken {
     @Column(nullable = false, unique = true, length = 255)
     private String refreshToken;
 
+    @Column(nullable = false, length = 255)
+    private String secretToken;
+
+    @Column(nullable = false, length = 255)
+    private String secretRefresh;
+
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
