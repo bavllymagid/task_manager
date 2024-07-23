@@ -1,7 +1,5 @@
 -- ====---------------- Authentication Service ----------------==== --
 
--- ====---------------- Authentication Service ----------------==== --
-
 -- drop user_roles table --
 DROP TABLE IF EXISTS user_roles; 
 
@@ -13,6 +11,7 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
+    secret_token VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -34,7 +33,6 @@ CREATE TABLE refresh_tokens (
     token_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(user_id),
     refresh_token VARCHAR(255) NOT NULL UNIQUE,
-    secret_token VARCHAR(255) NOT NULL,
     secret_refresh VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

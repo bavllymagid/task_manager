@@ -14,6 +14,7 @@ import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,7 @@ public class UserServiceImpl implements UserService{
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());
+        newUser.setSecretToken("");
         newUser.setUserRoles(setFirstRole(newUser));
         userRepository.save(newUser);
         userRolesRepository.saveAll(newUser.getUserRoles());
@@ -77,9 +79,10 @@ public class UserServiceImpl implements UserService{
             throw new AuthenticationFailedException("Invalid email or password.");
         }
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
+        userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
         UserDto userDto = new UserDto(user.get().getUsername(), user.get().getEmail(),"");
-        return new LoginDto(jwtUtil.generateToken(email,
-                new Date(System.currentTimeMillis()+ 43200000), refreshToken.getSecretToken()),
+        String token = jwtUtil.generateToken(email, new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
+        return new LoginDto(token,
                 refreshToken.getRefreshToken(),
                 userDto);
     }
@@ -106,4 +109,8 @@ public class UserServiceImpl implements UserService{
         return userDto;
     }
 
+    @Override
+    public User getUserByEmail(String email){
+        return userRepository.findByEmail(email).orElse(null);
+    }
 }

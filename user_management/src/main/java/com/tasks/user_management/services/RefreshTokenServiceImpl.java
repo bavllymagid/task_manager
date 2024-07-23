@@ -1,14 +1,16 @@
 package com.tasks.user_management.services;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.tasks.user_management.models.RefreshToken;
 import com.tasks.user_management.models.User;
 import com.tasks.user_management.repositories.RefreshTokenRepository;
 import com.tasks.user_management.repositories.UserRepository;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
+import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.util.Date;
 
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService{
+    private static final Logger log = LoggerFactory.getLogger(RefreshTokenServiceImpl.class);
     JwtUtil jwtUtil;
     RefreshTokenRepository refreshTokenRepository;
     UserRepository userRepository;
@@ -37,18 +40,30 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
                 .orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
         String email = jwtUtil.validateToken(refreshToken, token.getSecretRefresh());
         if (email != null) {
-            token.setSecretToken(RandomStringUtils.randomAlphanumeric(12));
+            String newToken = saveAccessToken(email);
             refreshTokenRepository.save(token);
-            return jwtUtil.generateToken(email, new Date(System.currentTimeMillis() + 43200000), token.getSecretToken());
+            return jwtUtil.generateToken(email, new Date(System.currentTimeMillis() + 43200000), newToken);
         } else {
             throw new TokenValidationException("Invalid refresh token");
+        }
+    }
+
+    private String saveAccessToken(String email) {
+        try {
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFound("User not found"));
+            user.setSecretToken(RandomStringUtils.randomAlphanumeric(12));
+            userRepository.save(user);
+            return user.getSecretToken();
+        } catch (UserNotFound e) {
+            log.error(e.getMessage());
+            return "";
         }
     }
 
     @Override
     public boolean validateToken(String token) throws TokenValidationException {
         token = token.replace("Bearer ", "");
-        if (jwtUtil.validateToken(token, getSecretFromEmail(token)) != null) {
+        if (jwtUtil.validateToken(token, userRepository.findSecretTokenByEmail(JWT.decode(token).getSubject())) != null) {
             return true;
         } else {
             throw new TokenValidationException("Invalid token");
@@ -58,7 +73,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     public RefreshToken createRefreshToken(User user){
         RefreshToken refreshToken = refreshTokenRepository.findByUserEmail(user.getEmail()).orElse(new RefreshToken());
         refreshToken.setUser(user);
-        refreshToken.setSecretToken(RandomStringUtils.randomAlphanumeric(12));
         refreshToken.setSecretRefresh(RandomStringUtils.randomAlphanumeric(12));
         refreshToken.setRefreshToken(jwtUtil.generateToken(user.getEmail(),
                 new Date(System.currentTimeMillis() + 2592000000L),
@@ -70,13 +84,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public String getSecretFromEmail(String token) {
-        DecodedJWT jwt = JWT.decode(token);
-        return refreshTokenRepository.findByUserEmail(jwt.getSubject()).get().getSecretToken();
-    }
-
-    @Override
-    public User getUserFromToken(String token) {
+    public User getUserFromToken(String token){
         return userRepository.findByEmail(JWT.decode(token).getSubject()).get();
     }
 

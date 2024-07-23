@@ -21,9 +21,6 @@ public class RefreshToken {
     private String refreshToken;
 
     @Column(nullable = false, length = 255)
-    private String secretToken;
-
-    @Column(nullable = false, length = 255)
     private String secretRefresh;
 
     @Column(name = "expires_at", nullable = false)
