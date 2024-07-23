@@ -1,18 +1,31 @@
 -- ====---------------- Authentication Service ----------------==== --
 
+-- ====---------------- Authentication Service ----------------==== --
+
+-- drop user_roles table --
+DROP TABLE IF EXISTS user_roles; 
+
 -- drop users table --
-DROP TABLE IF EXISTS USERS; 
+DROP TABLE IF EXISTS users; 
 -- create users table --
 CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
-    `role` VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_users_email ON users(email);
+
+-- Create user_roles table --
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, role),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
 
 -- drop refresh_tokens table --
 DROP TABLE IF EXISTS refresh_tokens; 
@@ -21,11 +34,13 @@ CREATE TABLE refresh_tokens (
     token_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(user_id),
     refresh_token VARCHAR(255) NOT NULL UNIQUE,
+    secret_token VARCHAR(255) NOT NULL,
+    secret_refresh VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
-CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+CREATE INDEX idx_refresh_tokens_token ON refresh_tokens(refresh_token);
 
 -- ====---------------- Authentication Service ----------------==== --
 
