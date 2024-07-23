@@ -7,8 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -31,8 +34,8 @@ public class User {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")
     private String password;
 
-    @Column(nullable = false, length = 50)
-    private String role;
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRole> userRoles = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -40,10 +43,10 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public User(String username, String email, String password, String role) {
+    public User(String username, String email, String password, List<UserRole> userRoles) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.role = role;
+        this.userRoles = userRoles;
     }
 }

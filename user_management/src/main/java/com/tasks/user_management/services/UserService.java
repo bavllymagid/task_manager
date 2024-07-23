@@ -7,9 +7,8 @@ import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
 
 public interface UserService {
-    void createUser(UserDto user, String role) throws UserAlreadyExistsException;
+    void createUser(UserDto user) throws UserAlreadyExistsException;
     LoginDto authenticateUser(String email, String password) throws AuthenticationFailedException;
-    void chooseRole(UserDto userDto, String role) throws UserAlreadyExistsException;
     void deleteUser(String email) throws UserNotFound;
     UserDto updateUser(UserDto userDto) throws UserNotFound;
 }

@@ -1,14 +1,12 @@
 package com.tasks.user_management.security.jwt;
 
-import com.tasks.user_management.models.Roles;
 import com.tasks.user_management.models.User;
+import com.tasks.user_management.models.UserRole;
 import com.tasks.user_management.services.RefreshTokenService;
-import com.tasks.user_management.utils.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,9 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -38,13 +34,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authorizationHeader.substring(7);
             User user = refreshTokenService.getUserFromToken(token);
             if (user.getEmail() != null) {
-                String role = user.getRole();
-                SimpleGrantedAuthority authorities = new SimpleGrantedAuthority("ROLE_"+role);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null, Collections.singletonList(authorities));
+                UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private static UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(User user) {
+        List<UserRole> roles = user.getUserRoles();
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        for (UserRole role : roles) {
+            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_" + role.getRole());
+            authorities.add(simpleGrantedAuthority);
+        }
+        return new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
     }
 
 }

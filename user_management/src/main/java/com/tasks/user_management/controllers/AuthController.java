@@ -1,7 +1,6 @@
 package com.tasks.user_management.controllers;
 
 import com.tasks.user_management.services.UserService;
-import com.tasks.user_management.models.Roles;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
@@ -24,19 +23,13 @@ public class AuthController {
 
     @PostMapping("/api/users/register")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto user) throws UserAlreadyExistsException {
-        userService.chooseRole(user, Roles.USER.name());
+        userService.createUser(user);
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("/api/users/login")
     public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException {
         return ResponseEntity.ok(userService.authenticateUser(user.getEmail(), user.getPassword()));
-    }
-
-    @PostMapping("/api/admin/register")
-    public ResponseEntity<UserDto> createAdmin(@RequestBody UserDto user) throws UserAlreadyExistsException {
-        userService.chooseRole(user, Roles.ADMIN.name());
-        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/api/users/update")

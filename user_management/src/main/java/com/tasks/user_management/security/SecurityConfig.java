@@ -1,7 +1,7 @@
 package com.tasks.user_management.security;
 
 import com.tasks.user_management.security.jwt.JwtAuthenticationFilter;
-import com.tasks.user_management.models.Roles;
+import com.tasks.user_management.utils.RolesConst;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,8 +36,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/admin/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/token/validate").hasAnyRole(Roles.USER.name(), Roles.ADMIN.name())
-                                .requestMatchers(HttpMethod.POST, "/api/token/refresh").hasAnyRole(Roles.USER.name(), Roles.ADMIN.name())
+                                .requestMatchers(HttpMethod.POST, "/api/token/validate").hasAnyRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.POST, "/api/token/refresh").hasAnyRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

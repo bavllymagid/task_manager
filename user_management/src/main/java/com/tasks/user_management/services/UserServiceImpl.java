@@ -2,8 +2,12 @@ package com.tasks.user_management.services;
 
 import com.tasks.user_management.models.RefreshToken;
 import com.tasks.user_management.models.User;
+import com.tasks.user_management.models.UserRole;
+import com.tasks.user_management.models.UserRoleId;
 import com.tasks.user_management.repositories.RefreshTokenRepository;
 import com.tasks.user_management.repositories.UserRepository;
+import com.tasks.user_management.repositories.UserRolesRepository;
+import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
@@ -16,8 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -28,22 +31,25 @@ public class UserServiceImpl implements UserService{
     PasswordEncoder passwordEncoder;
     JwtUtil jwtUtil;
     RefreshTokenService refreshTokenService;
+    UserRolesRepository userRolesRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            RefreshTokenRepository refreshTokenRepository,
                            RefreshTokenService refreshTokenService,
+                           UserRolesRepository userRolesRepository,
                            JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenRepository = refreshTokenRepository;
         this.refreshTokenService = refreshTokenService;
+        this.userRolesRepository = userRolesRepository;
         this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public void createUser(UserDto user, String role) throws UserAlreadyExistsException {
+    public void createUser(UserDto user) throws UserAlreadyExistsException {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists.");
         }
@@ -51,10 +57,17 @@ public class UserServiceImpl implements UserService{
         newUser.setUsername(user.getUsername());
         newUser.setEmail(user.getEmail());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        newUser.setRole(role);
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());
+        newUser.setUserRoles(setFirstRole(newUser));
         userRepository.save(newUser);
+        userRolesRepository.saveAll(newUser.getUserRoles());
+    }
+
+    private List<UserRole> setFirstRole(User user) {
+        List<UserRole> userRoles = new ArrayList<>();
+        userRoles.add(new UserRole(new UserRoleId(user.getId(), RolesConst.USER.name()),user, RolesConst.USER.name()));
+        return userRoles;
     }
 
     @Override
@@ -64,16 +77,11 @@ public class UserServiceImpl implements UserService{
             throw new AuthenticationFailedException("Invalid email or password.");
         }
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
-        UserDto userDto = new UserDto(user.get().getUsername(), user.get().getEmail(), user.get().getPassword());
+        UserDto userDto = new UserDto(user.get().getUsername(), user.get().getEmail(),"");
         return new LoginDto(jwtUtil.generateToken(email,
                 new Date(System.currentTimeMillis()+ 43200000), refreshToken.getSecretToken()),
                 refreshToken.getRefreshToken(),
                 userDto);
-    }
-
-    @Override
-    public void chooseRole(UserDto userDto, String role) throws UserAlreadyExistsException {
-        createUser(userDto, role);
     }
 
     @Override
