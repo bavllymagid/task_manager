@@ -3,17 +3,18 @@ package com.tasks.user_management.services;
 import com.tasks.user_management.models.RefreshToken;
 import com.tasks.user_management.models.User;
 import com.tasks.user_management.models.UserRole;
-import com.tasks.user_management.models.UserRoleId;
 import com.tasks.user_management.repositories.RefreshTokenRepository;
 import com.tasks.user_management.repositories.UserRepository;
 import com.tasks.user_management.repositories.UserRolesRepository;
 import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
+import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class UserServiceImpl implements UserService{
 
     private List<UserRole> setFirstRole(User user) {
         List<UserRole> userRoles = new ArrayList<>();
-        userRoles.add(new UserRole(new UserRoleId(user.getId(), RolesConst.USER.name()),user, RolesConst.USER.name()));
+        userRoles.add(new UserRole(user, RolesConst.USER.name()));
         return userRoles;
     }
 
@@ -88,17 +89,18 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(String email) throws UserNotFound {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            throw new UserNotFound("User with email " + email + " not found.");
-        }
-        userRepository.delete(user.get());
-        refreshTokenRepository.delete(refreshTokenRepository.findByUserEmail(user.get().getEmail()).get());
+    @Transactional
+    public void deleteUser(String email, String token) throws TokenValidationException, UserNotFound {
+        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
+
+        userRepository.deleteByEmail(email);
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) throws UserNotFound {
+    @Transactional
+    public UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFound {
+        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
+
         Optional<User> user = userRepository.findByEmail(userDto.getEmail());
         if (user.isEmpty()) {
             throw new UserNotFound("User with email " + userDto.getEmail() + " not found.");
@@ -110,7 +112,13 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User getUserByEmail(String email){
-        return userRepository.findByEmail(email).orElse(null);
+    public User getUserByEmail(String email, String token) throws TokenValidationException, UserNotFound {
+        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
+
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFound("User with email " + email + " not found.");
+        }
+        return user.get();
     }
 }

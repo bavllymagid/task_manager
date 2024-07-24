@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, BigInteger>{
     @Modifying
     @Query("update User u set u.secretToken = ?2 where u.email = ?1")
     void updateSecretTokenByEmail(String email, String secretToken);
+    @Transactional
+    void deleteByEmail(String email);
 }

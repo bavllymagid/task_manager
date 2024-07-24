@@ -1,24 +1,34 @@
 package com.tasks.user_management.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
+
 
 @Entity
 @Table(name = "user_roles")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class UserRole {
-    @EmbeddedId
-    private UserRoleId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    private BigInteger id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
-    @Column(name = "role", insertable = false, updatable = false)
+    @Column(name = "role", nullable = false)
     private String role;
+
+    public UserRole(User user, String role) {
+        this.user = user;
+        this.role = role;
+    }
 }

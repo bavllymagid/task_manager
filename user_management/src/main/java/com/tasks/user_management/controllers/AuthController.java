@@ -1,7 +1,9 @@
 package com.tasks.user_management.controllers;
 
+import com.tasks.user_management.models.User;
 import com.tasks.user_management.services.UserService;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
+import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.payload.LoginDto;
@@ -33,13 +35,15 @@ public class AuthController {
     }
 
     @PutMapping("/api/users/update")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) throws UserNotFound {
-        return ResponseEntity.ok(userService.updateUser(user));
+    public ResponseEntity<UserDto> updateUser(@RequestHeader("Authorization") String token,
+                                              @RequestBody UserDto user) throws UserNotFound, TokenValidationException {
+        return ResponseEntity.ok(userService.updateUser(user, token));
     }
 
     @DeleteMapping("/api/users/delete")
-    public ResponseEntity<String> deleteUser(@RequestBody UserDto user) throws UserNotFound {
-        userService.deleteUser(user.getEmail());
+    public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String token,
+                                             @RequestBody String email) throws UserNotFound, TokenValidationException {
+        userService.deleteUser(email, token);
         return ResponseEntity.ok("User deleted successfully.");
     }
 

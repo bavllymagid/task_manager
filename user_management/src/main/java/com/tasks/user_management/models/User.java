@@ -1,5 +1,6 @@
 package com.tasks.user_management.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -21,6 +22,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private BigInteger id;
 
     @Column(nullable = false, length = 50)
@@ -30,11 +32,12 @@ public class User {
     @Email
     private String email;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", nullable = false)
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")
+    @JsonIgnore
     private String password;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String secretToken;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -45,11 +48,4 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public User(String username, String email, String password, List<UserRole> userRoles) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.userRoles = userRoles;
-    }
 }
