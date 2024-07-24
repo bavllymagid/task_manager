@@ -13,5 +13,4 @@ public interface UserService {
     LoginDto authenticateUser(String email, String password) throws AuthenticationFailedException;
     void deleteUser(String email, String token) throws TokenValidationException, UserNotFound ;
     UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFound ;
-    User getUserByEmail(String email, String token) throws TokenValidationException, UserNotFound ;
 }

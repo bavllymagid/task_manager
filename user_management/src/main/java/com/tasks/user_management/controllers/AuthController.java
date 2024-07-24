@@ -42,7 +42,7 @@ public class AuthController {
 
     @DeleteMapping("/api/users/delete")
     public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String token,
-                                             @RequestBody String email) throws UserNotFound, TokenValidationException {
+                                             @RequestParam("email") String email) throws UserNotFound, TokenValidationException {
         userService.deleteUser(email, token);
         return ResponseEntity.ok("User deleted successfully.");
     }

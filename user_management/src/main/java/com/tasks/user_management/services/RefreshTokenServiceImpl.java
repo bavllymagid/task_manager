@@ -34,15 +34,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public String refreshAccessToken(String refreshToken) throws TokenValidationException {
+    public String refreshAccessToken(String refreshToken, String email) throws TokenValidationException {
         refreshToken = refreshToken.replace("Bearer ", "");
         RefreshToken token = refreshTokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
-        String email = jwtUtil.validateToken(refreshToken, token.getSecretRefresh());
-        if (email != null) {
-            String newToken = saveAccessToken(email);
+        String vEmail = jwtUtil.validateToken(refreshToken, token.getSecretRefresh());
+        vEmail = vEmail.equals(email) ? vEmail : null;
+        if (vEmail != null) {
+            String newToken = saveAccessToken(vEmail);
             refreshTokenRepository.save(token);
-            return jwtUtil.generateToken(email, new Date(System.currentTimeMillis() + 43200000), newToken);
+            return jwtUtil.generateToken(vEmail, new Date(System.currentTimeMillis() + 43200000), newToken);
         } else {
             throw new TokenValidationException("Invalid refresh token");
         }
@@ -61,9 +62,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public boolean validateToken(String token) throws TokenValidationException {
+    public boolean validateToken(String token, String email) throws TokenValidationException {
         token = token.replace("Bearer ", "");
-        if (jwtUtil.validateToken(token, userRepository.findSecretTokenByEmail(JWT.decode(token).getSubject())) != null) {
+        if(!email.equals(JWT.decode(token).getSubject())) throw new TokenValidationException("Invalid token");
+        if (jwtUtil.validateToken(token, userRepository.findSecretTokenByEmail(email)) != null) {
             return true;
         } else {
             throw new TokenValidationException("Invalid token");
