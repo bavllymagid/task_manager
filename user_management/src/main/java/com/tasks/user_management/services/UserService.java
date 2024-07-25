@@ -1,6 +1,5 @@
 package com.tasks.user_management.services;
 
-import com.tasks.user_management.models.User;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;

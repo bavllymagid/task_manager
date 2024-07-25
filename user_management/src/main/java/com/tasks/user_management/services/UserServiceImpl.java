@@ -1,11 +1,11 @@
 package com.tasks.user_management.services;
 
-import com.tasks.user_management.models.RefreshToken;
-import com.tasks.user_management.models.User;
-import com.tasks.user_management.models.UserRole;
-import com.tasks.user_management.repositories.RefreshTokenRepository;
-import com.tasks.user_management.repositories.UserRepository;
-import com.tasks.user_management.repositories.UserRolesRepository;
+import com.tasks.user_management.local.models.RefreshToken;
+import com.tasks.user_management.local.models.User;
+import com.tasks.user_management.local.models.UserRole;
+import com.tasks.user_management.local.repositories.RefreshTokenRepository;
+import com.tasks.user_management.local.repositories.UserRepository;
+import com.tasks.user_management.local.repositories.UserRolesRepository;
 import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
@@ -81,11 +81,10 @@ public class UserServiceImpl implements UserService{
         }
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
         userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
-        UserDto userDto = new UserDto(user.get().getUsername(), user.get().getEmail(),"");
         String token = jwtUtil.generateToken(email, new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
         return new LoginDto(token,
                 refreshToken.getRefreshToken(),
-                userDto);
+                user.get());
     }
 
     @Override

@@ -1,8 +1,7 @@
-package com.tasks.user_management.models;
+package com.tasks.user_management.local.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

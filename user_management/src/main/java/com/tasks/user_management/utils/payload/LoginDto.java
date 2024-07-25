@@ -1,5 +1,6 @@
 package com.tasks.user_management.utils.payload;
 
+import com.tasks.user_management.local.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,5 +9,5 @@ import lombok.Data;
 public class LoginDto {
     String token;
     String refreshToken;
-    UserDto user;
+    User user;
 }

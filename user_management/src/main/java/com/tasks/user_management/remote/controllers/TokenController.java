@@ -1,4 +1,4 @@
-package com.tasks.user_management.controllers;
+package com.tasks.user_management.remote.controllers;
 
 import com.tasks.user_management.services.RefreshTokenService;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;

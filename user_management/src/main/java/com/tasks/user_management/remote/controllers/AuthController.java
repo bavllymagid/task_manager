@@ -1,16 +1,21 @@
-package com.tasks.user_management.controllers;
+package com.tasks.user_management.remote.controllers;
 
-import com.tasks.user_management.models.User;
+import com.tasks.user_management.local.models.UserRole;
+import com.tasks.user_management.remote.requests.SendUserInstance;
 import com.tasks.user_management.services.UserService;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.payload.LoginDto;
+import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
 
 
 @RestController
@@ -30,8 +35,11 @@ public class AuthController {
     }
 
     @PostMapping("/api/users/login")
-    public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException {
-        return ResponseEntity.ok(userService.authenticateUser(user.getEmail(), user.getPassword()));
+    public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException, IOException, InterruptedException {
+        LoginDto loginDto = userService.authenticateUser(user.getEmail(), user.getPassword());
+        List<String> roles = loginDto.getUser().getUserRoles().stream().map(UserRole::getRole).toList();
+        SendUserInstance.sendInstance(new SendUserDto(loginDto.getUser().getId(), loginDto.getUser().getUsername(), loginDto.getUser().getEmail(), roles));
+        return ResponseEntity.ok(loginDto);
     }
 
     @PutMapping("/api/users/update")

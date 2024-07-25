@@ -1,8 +1,9 @@
 package com.tasks.user_management.security.jwt;
 
-import com.tasks.user_management.models.User;
-import com.tasks.user_management.models.UserRole;
+import com.tasks.user_management.local.models.User;
+import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.services.RefreshTokenService;
+import com.tasks.user_management.utils.exceptions.UserNotFound;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
-            User user = refreshTokenService.getUserFromToken(token);
+            User user = null;
+            try {
+                user = refreshTokenService.getUserFromToken(token);
+            } catch (UserNotFound e) {
+                throw new RuntimeException(e);
+            }
             if (user.getEmail() != null) {
                 UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

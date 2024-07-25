@@ -1,6 +1,6 @@
-package com.tasks.user_management.repositories;
+package com.tasks.user_management.local.repositories;
 
-import com.tasks.user_management.models.User;
+import com.tasks.user_management.local.models.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

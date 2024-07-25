@@ -1,10 +1,10 @@
 package com.tasks.user_management.services;
 
 import com.auth0.jwt.JWT;
-import com.tasks.user_management.models.RefreshToken;
-import com.tasks.user_management.models.User;
-import com.tasks.user_management.repositories.RefreshTokenRepository;
-import com.tasks.user_management.repositories.UserRepository;
+import com.tasks.user_management.local.models.RefreshToken;
+import com.tasks.user_management.local.models.User;
+import com.tasks.user_management.local.repositories.RefreshTokenRepository;
+import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.jwt.JwtUtil;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService{
@@ -86,8 +87,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public User getUserFromToken(String token){
-        return userRepository.findByEmail(JWT.decode(token).getSubject()).get();
+    public User getUserFromToken(String token)throws UserNotFound{
+        Optional<User> user = userRepository.findByEmail(JWT.decode(token).getSubject());
+        if(user.isEmpty()) throw new UserNotFound("User not found");
+        return user.get();
     }
 
 }

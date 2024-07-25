@@ -1,18 +1,16 @@
 package com.tasks.user_management.utils.payload;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class UserDto {
-    private BigInteger user_id;
+public class SendUserDto {
+    private BigInteger id;
     private String username;
     private String email;
-    private String password;
+    private List<String> roles;
 }

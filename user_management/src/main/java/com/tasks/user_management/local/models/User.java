@@ -1,4 +1,4 @@
-package com.tasks.user_management.models;
+package com.tasks.user_management.local.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -22,7 +22,6 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private BigInteger id;
 
     @Column(nullable = false, length = 50)
@@ -38,6 +37,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String secretToken;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

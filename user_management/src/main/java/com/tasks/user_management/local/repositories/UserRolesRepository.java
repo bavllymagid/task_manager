@@ -1,6 +1,6 @@
-package com.tasks.user_management.repositories;
+package com.tasks.user_management.local.repositories;
 
-import com.tasks.user_management.models.UserRole;
+import com.tasks.user_management.local.models.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigInteger;

@@ -1,4 +1,4 @@
-package com.tasks.user_management.models;
+package com.tasks.user_management.local.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
