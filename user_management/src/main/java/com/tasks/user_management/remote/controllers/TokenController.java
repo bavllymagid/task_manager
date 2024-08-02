@@ -17,13 +17,13 @@ public class TokenController {
         this.refreshTokenService = refreshTokenService;
     }
 
-    @PostMapping("/api/token/refresh")
+    @GetMapping("/api/token/refresh")
     public ResponseEntity<String> refreshToken(@RequestHeader("Authorization") String refreshToken,
                                                @RequestParam("email") String email) throws TokenValidationException {
         return new ResponseEntity<>(refreshTokenService.refreshAccessToken(refreshToken,email), HttpStatus.OK);
     }
 
-    @PostMapping("/api/token/validate")
+    @GetMapping("/api/token/validate")
     public ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String token,
                                                  @RequestParam("email") String email) throws TokenValidationException {
         return new ResponseEntity<>(refreshTokenService.validateToken(token, email), HttpStatus.OK);
