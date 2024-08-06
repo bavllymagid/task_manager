@@ -16,7 +16,7 @@ public class SendUserInstance {
         String requestBody = objectMapper.writeValueAsString(user);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(java.net.URI.create("http://localhost:8081/task/recieve_instance"))
+                .uri(java.net.URI.create("http://localhost:8081/api/task/receive_instance"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();

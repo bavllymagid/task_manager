@@ -2,29 +2,33 @@ package com.tasks.task_management.security;
 
 import com.tasks.task_management.local.StaticObjects.RolesConst;
 import com.tasks.task_management.security.authenticationProvider.CustomAuthenticationFilter;
-import com.tasks.task_management.security.authenticationProvider.CustomAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authConfig) throws Exception {
+        AuthenticationManager authManager = authConfig.getAuthenticationManager();
+
         http.csrf().disable()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers(HttpMethod.POST, "/task/recieve_instance").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/task/validate").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/task/receive_instance").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/task/validate").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
-                .authenticationProvider(new CustomAuthenticationProvider())
+                .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
 
         return http.build();
