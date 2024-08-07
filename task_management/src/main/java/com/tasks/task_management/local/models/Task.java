@@ -13,7 +13,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_id")
-    private Long taskId;
+    private BigInteger taskId;
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;
@@ -25,7 +25,7 @@ public class Task {
     private String status;
 
     @Column(name = "created_by", nullable = false)
-    private Long createdBy;
+    private BigInteger createdBy;
 
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
