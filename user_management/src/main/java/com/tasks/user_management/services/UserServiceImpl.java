@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public void deleteUser(String email, String token) throws TokenValidationException, UserNotFound {
-        if(!refreshTokenService.validateToken(token, email)) throw new TokenValidationException("Invalid token");
+        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
 
         userRepository.deleteByEmail(email);
     }
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFound {
-        if(!refreshTokenService.validateToken(token, userDto.getEmail())) throw new TokenValidationException("Invalid token");
+        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
 
         Optional<User> user = userRepository.findByEmail(userDto.getEmail());
         if (user.isEmpty()) {
@@ -108,5 +108,18 @@ public class UserServiceImpl implements UserService{
         user.get().setPassword(passwordEncoder.encode(userDto.getPassword()));
         userRepository.save(user.get());
         return userDto;
+    }
+
+    @Override
+    public List<UserDto> getListOfUsers(String token)throws TokenValidationException{
+
+        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid Token");
+
+        List<User> users = userRepository.findAll();
+        List<UserDto> usersDto = new ArrayList<>();
+        for (User user : users){
+            usersDto.add(new UserDto(user.getId(), user.getUsername(), user.getEmail(), ""));
+        }
+        return usersDto;
     }
 }

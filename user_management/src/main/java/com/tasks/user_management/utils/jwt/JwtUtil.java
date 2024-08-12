@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -22,14 +23,14 @@ public class JwtUtil {
                 .sign(algorithm);
     }
 
-    public String validateToken(String token, String secret) {
+    public String validateToken(String token, String secret) throws TokenValidationException {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         JWTVerifier verifier = JWT.require(algorithm).build();
         try {
             DecodedJWT jwt = verifier.verify(token);
             return jwt.getSubject();
         } catch (JWTVerificationException e) {
-            return null;
+            throw new TokenValidationException("Invalid Token");
         }
     }
 }

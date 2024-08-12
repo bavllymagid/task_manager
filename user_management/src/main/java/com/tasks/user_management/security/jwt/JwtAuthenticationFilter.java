@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 user = refreshTokenService.getUserFromToken(token);
             } catch (UserNotFound e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("User Not Found");
             }
             if (user.getEmail() != null) {
                 UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);

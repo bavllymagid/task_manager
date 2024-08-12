@@ -19,6 +19,7 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/api/users")
 public class AuthController {
 
     private final UserService userService;
@@ -28,13 +29,13 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/api/users/register")
+    @PostMapping("/register")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto user) throws UserAlreadyExistsException {
         userService.createUser(user);
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/api/users/login")
+    @PostMapping("/login")
     public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException, IOException, InterruptedException {
         LoginDto loginDto = userService.authenticateUser(user.getEmail(), user.getPassword());
         List<String> roles = loginDto.getUser().getUserRoles().stream().map(UserRole::getRole).toList();
@@ -42,17 +43,22 @@ public class AuthController {
         return ResponseEntity.ok(loginDto);
     }
 
-    @PutMapping("/api/users/update")
+    @PutMapping("/update")
     public ResponseEntity<UserDto> updateUser(@RequestHeader("Authorization") String token,
                                               @RequestBody UserDto user) throws UserNotFound, TokenValidationException {
         return ResponseEntity.ok(userService.updateUser(user, token));
     }
 
-    @DeleteMapping("/api/users/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String token,
                                              @RequestParam("email") String email) throws UserNotFound, TokenValidationException {
         userService.deleteUser(email, token);
         return ResponseEntity.ok("User deleted successfully.");
+    }
+
+    @GetMapping("/get_users")
+    public ResponseEntity<List<UserDto>> getUsers(@RequestHeader("Authorization") String token) throws TokenValidationException {
+        return ResponseEntity.ok(userService.getListOfUsers(token));
     }
 
 }

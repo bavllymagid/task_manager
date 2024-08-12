@@ -35,12 +35,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public String refreshAccessToken(String refreshToken, String email) throws TokenValidationException {
+    public String refreshAccessToken(String refreshToken) throws TokenValidationException {
         refreshToken = refreshToken.replace("Bearer ", "");
         RefreshToken token = refreshTokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
         String vEmail = jwtUtil.validateToken(refreshToken, token.getSecretRefresh());
-        vEmail = vEmail.equals(email) ? vEmail : null;
         if (vEmail != null) {
             String newToken = saveAccessToken(vEmail);
             refreshTokenRepository.save(token);
@@ -63,9 +62,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public boolean validateToken(String token, String email) throws TokenValidationException {
+    public boolean validateToken(String token) throws TokenValidationException {
         token = token.replace("Bearer ", "");
-        if(!email.equals(JWT.decode(token).getSubject())) throw new TokenValidationException("Invalid token");
+        String email = JWT.decode(token).getSubject();
         if (jwtUtil.validateToken(token, userRepository.findSecretTokenByEmail(email)) != null) {
             return true;
         } else {
@@ -87,9 +86,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public User getUserFromToken(String token)throws UserNotFound{
+    public User getUserFromToken(String token) throws UserNotFound{
         Optional<User> user = userRepository.findByEmail(JWT.decode(token).getSubject());
-        if(user.isEmpty()) throw new UserNotFound("User not found");
+        if(user.isEmpty()) throw new UserNotFound("User Not Found");
         return user.get();
     }
 

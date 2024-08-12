@@ -19,7 +19,7 @@ public class Requests {
         UserSingleton user = UserSingleton.getInstance();
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(java.net.URI.create(validate+"?email="+user.getEmail()))
+                .uri(java.net.URI.create(validate))
                 .header("Authorization", token)
                 .GET()
                 .build();
