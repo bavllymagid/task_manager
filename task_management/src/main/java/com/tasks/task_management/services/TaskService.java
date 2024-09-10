@@ -11,5 +11,7 @@ public interface TaskService {
     void updateTask(Task task) throws TaskNotFoundException;
     void deleteTask(BigInteger taskId) throws TaskNotFoundException;
     Task getTask(BigInteger taskId) throws TaskNotFoundException;
-    List<Task> getTasks();
+    List<Task> getUserCreatedTasks(BigInteger id);
+    void assignTask(BigInteger taskID, BigInteger userID);
+    List<Task> getAssignedTasks(BigInteger userID);
 }
