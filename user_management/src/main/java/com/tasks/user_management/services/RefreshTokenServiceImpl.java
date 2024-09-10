@@ -43,7 +43,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         if (vEmail != null) {
             String newToken = saveAccessToken(vEmail);
             refreshTokenRepository.save(token);
-            return jwtUtil.generateToken(vEmail, new Date(System.currentTimeMillis() + 43200000), newToken);
+            User user = userRepository.findByEmail(vEmail).orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
+            return jwtUtil.generateToken(user, new Date(System.currentTimeMillis() + 43200000), newToken);
         } else {
             throw new TokenValidationException("Invalid refresh token");
         }
@@ -76,7 +77,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         RefreshToken refreshToken = refreshTokenRepository.findByUserEmail(user.getEmail()).orElse(new RefreshToken());
         refreshToken.setUser(user);
         refreshToken.setSecretRefresh(RandomStringUtils.randomAlphanumeric(12));
-        refreshToken.setRefreshToken(jwtUtil.generateToken(user.getEmail(),
+        refreshToken.setRefreshToken(jwtUtil.generateToken(user,
                 new Date(System.currentTimeMillis() + 2592000000L),
                 refreshToken.getSecretRefresh()));
         refreshToken.setCreatedAt(LocalDateTime.now());

@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +15,13 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    public String generateToken(String email, Date expirationDate, String secret) {
+    public String generateToken(User user, Date expirationDate, String secret) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
-                .withSubject(email)
+                .withSubject(user.getEmail())
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(expirationDate) // set expiration date
+                .withClaim("roles", user.getUserRoles())
                 .sign(algorithm);
     }
 

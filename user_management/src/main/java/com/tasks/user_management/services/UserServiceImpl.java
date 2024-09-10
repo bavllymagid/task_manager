@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService{
         }
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
         userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
-        String token = jwtUtil.generateToken(email, new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
+        String token = jwtUtil.generateToken(user.get(), new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
         return new LoginDto(token,
                 refreshToken.getRefreshToken(),
                 user.get());
