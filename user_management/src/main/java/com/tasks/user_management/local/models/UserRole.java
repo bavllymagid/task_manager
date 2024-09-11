@@ -9,7 +9,7 @@ import java.math.BigInteger;
 
 
 @Entity
-@Table(name = "user_roles")
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
 public class UserRole {
@@ -18,16 +18,10 @@ public class UserRole {
     @JsonIgnore
     private BigInteger id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
-    private User user;
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
 
-    @Column(name = "role", nullable = false)
-    private String role;
-
-    public UserRole(User user, String role) {
-        this.user = user;
-        this.role = role;
+    public UserRole(String name) {
+        this.name = name;
     }
 }

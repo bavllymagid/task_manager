@@ -1,5 +1,7 @@
 -- drop user_roles table --
 DROP TABLE IF EXISTS user_roles; 
+-- Drop roles table if needed --
+DROP TABLE IF EXISTS roles;
 -- drop refresh_tokens table --
 DROP TABLE IF EXISTS refresh_tokens; 
 -- drop task_assignments table --
@@ -10,6 +12,7 @@ DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS tasks; 
 -- drop users table --
 DROP TABLE IF EXISTS users; 
+
 
 -- ====---------------- Authentication Service ----------------==== --
 
@@ -25,14 +28,26 @@ CREATE TABLE users (
 );
 CREATE INDEX idx_users_email ON users(email);
 
+-- create roles table --
+CREATE TABLE roles (
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(50) NOT NULL UNIQUE
+);
+-- insert roles in the begining-- 
+insert into roles values(1, "USER");
+insert into roles values(2, "ADMIN");
+insert into roles values(3, "MANAGER");
+
 -- Create user_roles table --
 CREATE TABLE user_roles (
-	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	role_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    role VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_role_roles_user_id ON user_roles(role_id);
 
 
 -- create refresh_tokens table --

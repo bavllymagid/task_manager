@@ -40,7 +40,12 @@ public class User {
     @JsonIgnore
     private String secretToken;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private List<UserRole> userRoles = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
