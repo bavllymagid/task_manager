@@ -3,11 +3,13 @@ package com.tasks.user_management.services;
 import com.auth0.jwt.JWT;
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
+import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.jwt.JwtUtil;
+import com.tasks.user_management.utils.payload.SendUserDto;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,11 +66,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public boolean validateToken(String token) throws TokenValidationException {
+    public SendUserDto validateToken(String token) throws TokenValidationException {
         token = token.replace("Bearer ", "");
         String email = JWT.decode(token).getSubject();
         if (jwtUtil.validateToken(token, userRepository.findSecretTokenByEmail(email)) != null) {
-            return true;
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new TokenValidationException("Invalid token"));
+            List<String> roles = user.getUserRoles().stream().map(UserRole::getName).toList();
+            return new SendUserDto(user.getId(), user.getUsername(), user.getEmail(), roles);
         } else {
             throw new TokenValidationException("Invalid token");
         }

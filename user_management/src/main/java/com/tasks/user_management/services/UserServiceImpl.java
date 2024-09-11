@@ -2,7 +2,6 @@ package com.tasks.user_management.services;
 
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
-import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.local.repositories.UserRolesRepository;
@@ -62,15 +61,8 @@ public class UserServiceImpl implements UserService{
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());
         newUser.setSecretToken("");
-        newUser.setUserRoles(setFirstRole(newUser));
+        newUser.setUserRoles(new ArrayList<>(List.of(userRolesRepository.findByName(RolesConst.USER.name()))));
         userRepository.save(newUser);
-        userRolesRepository.saveAll(newUser.getUserRoles());
-    }
-
-    private List<UserRole> setFirstRole(User user) {
-        List<UserRole> userRoles = new ArrayList<>();
-        userRoles.add(new UserRole(user, RolesConst.USER.name()));
-        return userRoles;
     }
 
     @Override
@@ -82,23 +74,20 @@ public class UserServiceImpl implements UserService{
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
         userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
         String token = jwtUtil.generateToken(user.get(), new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
-        return new LoginDto(token,
-                refreshToken.getRefreshToken(),
-                user.get());
+        return new LoginDto(token, refreshToken.getRefreshToken(), user.get());
     }
 
     @Override
     @Transactional
     public void deleteUser(String email, String token) throws TokenValidationException, UserNotFound {
-        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
-
+        if(refreshTokenService.validateToken(token) == null) throw new TokenValidationException("Invalid token");
         userRepository.deleteByEmail(email);
     }
 
     @Override
     @Transactional
     public UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFound {
-        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid token");
+        if(refreshTokenService.validateToken(token) == null ) throw new TokenValidationException("Invalid token");
 
         Optional<User> user = userRepository.findByEmail(userDto.getEmail());
         if (user.isEmpty()) {
@@ -113,7 +102,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<UserDto> getListOfUsers(String token)throws TokenValidationException{
 
-        if(!refreshTokenService.validateToken(token)) throw new TokenValidationException("Invalid Token");
+        if(refreshTokenService.validateToken(token) == null) throw new TokenValidationException("Invalid Token");
 
         List<User> users = userRepository.findAll();
         List<UserDto> usersDto = new ArrayList<>();

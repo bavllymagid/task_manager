@@ -10,6 +10,8 @@ import com.tasks.user_management.utils.exceptions.UserNotFound;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final UserService userService;
 
     @Autowired
@@ -38,8 +41,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException, IOException, InterruptedException {
         LoginDto loginDto = userService.authenticateUser(user.getEmail(), user.getPassword());
-        List<String> roles = loginDto.getUser().getUserRoles().stream().map(UserRole::getRole).toList();
-        SendUserInstance.sendInstance(new SendUserDto(loginDto.getUser().getId(), loginDto.getUser().getUsername(), loginDto.getUser().getEmail(), roles));
+        List<String> roles = loginDto.getUser().getUserRoles().stream().map(UserRole::getName).toList();
+        try {
+            SendUserInstance.sendInstance(new SendUserDto(loginDto.getUser().getId(), loginDto.getUser().getUsername(), loginDto.getUser().getEmail(), roles));
+        } catch (Exception e) {
+            log.error("Error sending user instance: {}", e.getMessage());
+        }
         return ResponseEntity.ok(loginDto);
     }
 

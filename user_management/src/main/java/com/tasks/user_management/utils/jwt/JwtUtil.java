@@ -21,7 +21,6 @@ public class JwtUtil {
                 .withSubject(user.getEmail())
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(expirationDate) // set expiration date
-                .withClaim("roles", user.getUserRoles())
                 .sign(algorithm);
     }
 
