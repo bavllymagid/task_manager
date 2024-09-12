@@ -75,8 +75,7 @@ CREATE TABLE tasks (
     `status` VARCHAR(50) NOT NULL,
     created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_tasks_created_by ON tasks(created_by);
 CREATE INDEX idx_tasks_status ON tasks(`status`);
@@ -88,9 +87,7 @@ CREATE TABLE task_assignments (
     user_id BIGINT NOT NULL,
     assigned_by BIGINT NOT NULL,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
 );
 CREATE INDEX idx_task_assignments_task_id ON task_assignments(task_id);
 CREATE INDEX idx_task_assignments_user_id ON task_assignments(user_id);
@@ -105,7 +102,6 @@ CREATE TABLE notifications (
     message TEXT NOT NULL,
     `read` BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
 );
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
