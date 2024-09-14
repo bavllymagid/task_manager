@@ -1,6 +1,7 @@
 package com.tasks.task_management.remote.services;
 
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
+import com.tasks.task_management.local.exceptions.InvalidToken;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;
@@ -32,7 +33,7 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public void createTask(TaskDto task) {
+    public void createTask(TaskDto task) throws InvalidToken {
         Task newTask = new Task();
         newTask.setUserId(UserSingleton.getInstance().getId());
         newTask.setTitle(task.getTitle());

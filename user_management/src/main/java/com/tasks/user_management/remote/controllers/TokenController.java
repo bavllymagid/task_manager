@@ -37,6 +37,7 @@ public class TokenController {
         } catch (Exception e) {
             log.error("Error sending user instance: {}", e.getMessage());
         }
+        log.info("Token validated successfully");
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }

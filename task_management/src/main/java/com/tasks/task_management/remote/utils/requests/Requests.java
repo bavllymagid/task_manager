@@ -4,6 +4,12 @@ import com.tasks.task_management.local.exceptions.InvalidToken;
 import com.tasks.task_management.remote.utils.payload.UserInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,20 +22,27 @@ public class Requests {
     private static final Logger log = LoggerFactory.getLogger(Requests.class);
 
     public static boolean validateToken(String token) throws InvalidToken {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(java.net.URI.create(validate))
-                .header("Authorization", token)
-                .GET()
-                .build();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        HttpResponse<String> response = null;
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            log.debug("Failed to validate token: {}", e.getMessage());
-        }
+            ResponseEntity<UserInstance> response = restTemplate.exchange(validate, HttpMethod.GET, entity, UserInstance.class);
 
-        return Objects.equals(response.body(), "true");
+            log.info("Response Status: {}", response.getStatusCode());
+            log.info("Response Body: {}", response.getBody());
+
+            if (response.getStatusCode().value() == 200) {
+                return true;
+            } else {
+                log.error("Token validation failed with status code: {}", response.getStatusCode());
+            }
+
+        } catch (RestClientException e) {
+            log.error("Failed to validate token: {}", e.getMessage());
+            throw new InvalidToken("Token validation failed");
+        }
+        return false;
     }
 }

@@ -24,15 +24,15 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             UserSingleton user = null;
             String token = authorizationHeader.substring(7);
+            if(!Requests.validateToken(token)) throw new InvalidToken("Invalid token");
             try {
-                Requests.validateToken(token);
                 user = UserSingleton.getInstance();
                 if (user.getEmail() != null) {
                     UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
-                throw new InvalidToken("Invalid token");
+                throw new RuntimeException();
             }
         }
         filterChain.doFilter(request, response);
