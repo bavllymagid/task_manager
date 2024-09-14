@@ -75,7 +75,7 @@ CREATE TABLE tasks (
     `status` VARCHAR(50) NOT NULL,
     user_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    due_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    due_date TIMESTAMP
 );
 CREATE INDEX idx_tasks_created_by ON tasks(user_id);
 CREATE INDEX idx_tasks_status ON tasks(`status`);

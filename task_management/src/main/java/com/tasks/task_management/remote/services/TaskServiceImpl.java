@@ -39,22 +39,26 @@ public class TaskServiceImpl implements TaskService {
         newTask.setUserId(UserSingleton.getInstance().getId());
         newTask.setTitle(task.getTitle());
         newTask.setDescription(task.getDescription());
-        newTask.setCreatedAt(LocalDateTime.now());
         if(task.getDueDate().isBefore(LocalDateTime.now())) {
             throw new PassedDueDateException("Due date has passed");
         }
         newTask.setDueDate(task.getDueDate());
         newTask.setStatus(task.getStatus());
         taskRepository.save(newTask);
-        task.setCreatedAt(newTask.getCreatedAt());
+        task.setCreatedAt(LocalDateTime.now());
         task.setUserId(newTask.getUserId());
         return task;
     }
 
     @Override
-    public void updateTask(Task task) throws TaskNotFoundException {
+    public void updateTask(TaskDto task) throws TaskNotFoundException {
         if(taskRepository.existsById(task.getTaskId())) {
-            taskRepository.save(task);
+            Task updatedTask = taskRepository.findById(task.getTaskId()).get();
+            updatedTask.setTitle(task.getTitle());
+            updatedTask.setDescription(task.getDescription());
+            updatedTask.setDueDate(task.getDueDate());
+            updatedTask.setStatus(task.getStatus());
+            taskRepository.save(updatedTask);
         } else {
             throw new TaskNotFoundException("Task not found");
         }
@@ -76,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Page<Task> getUserCreatedTasks(BigInteger id, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("dueDate").ascending());
         return taskRepository.findTasksByUserId(id, pageable);
     }
 

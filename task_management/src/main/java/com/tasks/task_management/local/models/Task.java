@@ -30,6 +30,6 @@ public class Task {
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "due_date", nullable = false, insertable = false)
+    @Column(name = "due_date", nullable = false)
     private LocalDateTime dueDate;
 }

@@ -6,6 +6,7 @@ import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.remote.dto.TaskDto;
 import com.tasks.task_management.remote.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +30,8 @@ public class TaskController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Task> updateTask(@RequestHeader("Authorization") String token,
-                                           @RequestBody Task task) {
+    public ResponseEntity<TaskDto> updateTask(@RequestHeader("Authorization") String token,
+                                           @RequestBody TaskDto task) {
         taskService.updateTask(task);
         return ResponseEntity.ok(task);
     }
@@ -49,11 +50,11 @@ public class TaskController {
     }
 
     @GetMapping("/get/user_tasks/{userId}")
-    public ResponseEntity<List<Task>> getUserCreatedTasks(@RequestHeader("Authorization") String token,
+    public ResponseEntity<Page<Task>> getUserCreatedTasks(@RequestHeader("Authorization") String token,
                                                           @PathVariable BigInteger userId,
                                                           @RequestParam int page,
                                                           @RequestParam int size) {
-        return ResponseEntity.ok(taskService.getUserCreatedTasks(userId, page, size).getContent());
+        return ResponseEntity.ok(taskService.getUserCreatedTasks(userId, page, size));
     }
 
 }
