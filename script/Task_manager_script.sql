@@ -73,11 +73,11 @@ CREATE TABLE tasks (
     title VARCHAR(255) NOT NULL,
     `description` TEXT,
     `status` VARCHAR(50) NOT NULL,
-    created_by BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    due_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX idx_tasks_created_by ON tasks(created_by);
+CREATE INDEX idx_tasks_created_by ON tasks(user_id);
 CREATE INDEX idx_tasks_status ON tasks(`status`);
 
 -- create task_assignments table --
