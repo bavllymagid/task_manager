@@ -1,19 +1,15 @@
 package com.tasks.task_management.security.authenticationProvider;
 
-import com.tasks.task_management.local.StaticObjects.RolesConst;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
+import com.tasks.task_management.local.exceptions.InvalidToken;
+import com.tasks.task_management.remote.utils.requests.Requests;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -27,14 +23,16 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             UserSingleton user = null;
+            String token = authorizationHeader.substring(7);
             try {
+                Requests.validateToken(token);
                 user = UserSingleton.getInstance();
+                if (user.getEmail() != null) {
+                    UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            if (user.getEmail() != null) {
-                UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                throw new InvalidToken("Invalid token");
             }
         }
         filterChain.doFilter(request, response);

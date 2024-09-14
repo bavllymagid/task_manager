@@ -1,7 +1,7 @@
 package com.tasks.task_management.remote.utils.requests;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
+import com.tasks.task_management.local.exceptions.InvalidToken;
+import com.tasks.task_management.remote.utils.payload.UserInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +15,7 @@ public class Requests {
     private static final String validate = BaseUrl + "validate";
     private static final Logger log = LoggerFactory.getLogger(Requests.class);
 
-    public static boolean validateToken(String token) {
-        UserSingleton user = UserSingleton.getInstance();
+    public static boolean validateToken(String token) throws InvalidToken {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(java.net.URI.create(validate))

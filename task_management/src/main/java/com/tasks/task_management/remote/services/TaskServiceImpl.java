@@ -1,4 +1,4 @@
-package com.tasks.task_management.services;
+package com.tasks.task_management.remote.services;
 
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
@@ -6,14 +6,18 @@ import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;
 import com.tasks.task_management.local.repositories.TaskAssRepository;
 import com.tasks.task_management.local.repositories.TaskRepository;
+import com.tasks.task_management.remote.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
+@Service
 public class TaskServiceImpl implements TaskService {
 
     TaskRepository taskRepository;
@@ -28,8 +32,15 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public void createTask(Task task) {
-        taskRepository.save(task);
+    public void createTask(TaskDto task) {
+        Task newTask = new Task();
+        newTask.setUserId(UserSingleton.getInstance().getId());
+        newTask.setTitle(task.getTitle());
+        newTask.setDescription(task.getDescription());
+        newTask.setCreatedAt(LocalDateTime.now());
+        newTask.setDueDate(task.getDueDate());
+        newTask.setStatus(task.getStatus());
+        taskRepository.save(newTask);
     }
 
     @Override
@@ -56,8 +67,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> getUserCreatedTasks(BigInteger id) {
-        return taskRepository.findAllByUserId(id).orElseGet(ArrayList::new);
+    public Page<Task> getUserCreatedTasks(BigInteger id, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return taskRepository.findTasksByUserId(id, pageable);
     }
 
     @Override
@@ -71,11 +83,5 @@ public class TaskServiceImpl implements TaskService {
 
         assignmentRepository.save(assignment);
     }
-
-    @Override
-    public List<Task> getAssignedTasks(BigInteger userID){
-        Optional<List<Task>> tasks = taskRepository.getTasksByUserId(userID);
-        return tasks.orElseGet(ArrayList::new);
-    }
-
+    
 }

@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(HttpMethod.POST, "/api/task/receive_instance").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/task/validate").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.GET, "/api/task/create").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)

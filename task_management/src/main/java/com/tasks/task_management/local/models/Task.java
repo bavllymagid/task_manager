@@ -24,12 +24,12 @@ public class Task {
     @Column(name = "status", nullable = false, length = 50)
     private String status;
 
-    @Column(name = "created_by", nullable = false)
-    private BigInteger createdBy;
+    @Column(name = "user_id", nullable = false)
+    private BigInteger userId;
 
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, insertable = false)
-    private LocalDateTime updatedAt;
+    @Column(name = "due_date", nullable = false, insertable = false)
+    private LocalDateTime dueDate;
 }
