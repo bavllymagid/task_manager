@@ -15,6 +15,7 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, BigInteger> {
     Page<Task> findTasksByUserId(BigInteger userId, Pageable pageable);
+    Task findTaskByUserId(BigInteger userId);
 
     @Transactional
     void deleteByUserId(BigInteger userId);

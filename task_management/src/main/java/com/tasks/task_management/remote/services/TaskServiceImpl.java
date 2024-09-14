@@ -1,7 +1,8 @@
 package com.tasks.task_management.remote.services;
 
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
-import com.tasks.task_management.local.exceptions.InvalidToken;
+import com.tasks.task_management.local.exceptions.InvalidTokenException;
+import com.tasks.task_management.local.exceptions.PassedDueDateException;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;
@@ -33,15 +34,21 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public void createTask(TaskDto task) throws InvalidToken {
+    public TaskDto createTask(TaskDto task) throws InvalidTokenException, PassedDueDateException {
         Task newTask = new Task();
         newTask.setUserId(UserSingleton.getInstance().getId());
         newTask.setTitle(task.getTitle());
         newTask.setDescription(task.getDescription());
         newTask.setCreatedAt(LocalDateTime.now());
+        if(task.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new PassedDueDateException("Due date has passed");
+        }
         newTask.setDueDate(task.getDueDate());
         newTask.setStatus(task.getStatus());
         taskRepository.save(newTask);
+        task.setCreatedAt(newTask.getCreatedAt());
+        task.setUserId(newTask.getUserId());
+        return task;
     }
 
     @Override

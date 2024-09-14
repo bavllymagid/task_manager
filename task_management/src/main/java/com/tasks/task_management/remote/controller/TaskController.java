@@ -1,5 +1,7 @@
 package com.tasks.task_management.remote.controller;
 
+import com.tasks.task_management.local.exceptions.InvalidTokenException;
+import com.tasks.task_management.local.exceptions.PassedDueDateException;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.remote.dto.TaskDto;
 import com.tasks.task_management.remote.services.TaskService;
@@ -22,9 +24,8 @@ public class TaskController {
 
     @PostMapping("/create")
     public ResponseEntity<TaskDto> createTask(@RequestHeader("Authorization") String token,
-                                              @RequestBody TaskDto task) {
-        taskService.createTask(task);
-        return ResponseEntity.ok(task);
+                                              @RequestBody TaskDto task) throws InvalidTokenException, PassedDueDateException {
+        return ResponseEntity.ok(taskService.createTask(task));
     }
 
     @PutMapping("/update")

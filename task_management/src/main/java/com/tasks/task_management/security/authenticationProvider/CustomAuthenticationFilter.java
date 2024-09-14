@@ -1,7 +1,7 @@
 package com.tasks.task_management.security.authenticationProvider;
 
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
-import com.tasks.task_management.local.exceptions.InvalidToken;
+import com.tasks.task_management.local.exceptions.InvalidTokenException;
 import com.tasks.task_management.remote.utils.requests.Requests;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,7 +31,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            } catch (InvalidToken ex) {
+            } catch (InvalidTokenException ex) {
                 // Log or handle token validation errors
                 System.out.println("Invalid token exception: " + ex.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
