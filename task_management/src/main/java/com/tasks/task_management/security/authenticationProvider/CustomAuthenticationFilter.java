@@ -22,17 +22,23 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            UserSingleton user = null;
+            UserSingleton user;
             String token = authorizationHeader.substring(7);
-            if(!Requests.validateToken(token)) throw new InvalidToken("Invalid token");
+            Requests.validateToken(token);
             try {
                 user = UserSingleton.getInstance();
                 if (user.getEmail() != null) {
                     UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException();
+            } catch (InvalidToken ex) {
+                // Log or handle token validation errors
+                System.out.println("Invalid token exception: " + ex.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+            }catch (Exception ex) {
+                // Log or handle generic exceptions
+                System.out.println("Exception in filter: " + ex.getMessage());
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
             }
         }
         filterChain.doFilter(request, response);

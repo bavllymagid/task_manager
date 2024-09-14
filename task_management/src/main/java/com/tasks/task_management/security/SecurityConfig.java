@@ -1,6 +1,7 @@
 package com.tasks.task_management.security;
 
 import com.tasks.task_management.local.StaticObjects.RolesConst;
+import com.tasks.task_management.security.authenticationProvider.CustomAuthEntryPoint;
 import com.tasks.task_management.security.authenticationProvider.CustomAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
+    private final CustomAuthEntryPoint authEntryPoint;
+
+    public SecurityConfig(CustomAuthEntryPoint authEntryPoint) {
+        this.authEntryPoint = authEntryPoint;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authConfig) throws Exception {
         AuthenticationManager authManager = authConfig.getAuthenticationManager();
@@ -28,6 +35,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/task/create").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authEntryPoint))
                 .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
 
