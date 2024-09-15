@@ -83,17 +83,4 @@ public class TaskServiceImpl implements TaskService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("dueDate").ascending());
         return taskRepository.findTasksByUserId(id, pageable);
     }
-
-    @Override
-    public void assignTask(BigInteger taskID, BigInteger userID) {
-        TaskAssignment assignment = new TaskAssignment();
-
-        assignment.setTaskId(taskID);
-        assignment.setAssignedBy(UserSingleton.getInstance().getId());
-        assignment.setUserId(userID);
-        assignment.setAssignedAt(LocalDateTime.now());
-
-        assignmentRepository.save(assignment);
-    }
-    
 }

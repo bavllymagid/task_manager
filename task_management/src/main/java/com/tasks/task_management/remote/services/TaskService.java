@@ -14,5 +14,4 @@ public interface TaskService {
     void deleteTask(BigInteger taskId) throws TaskNotFoundException;
     Task getTask(BigInteger taskId) throws TaskNotFoundException;
     Page<Task> getUserCreatedTasks(BigInteger id, int page, int size);
-    void assignTask(BigInteger taskID, BigInteger userID);
 }
