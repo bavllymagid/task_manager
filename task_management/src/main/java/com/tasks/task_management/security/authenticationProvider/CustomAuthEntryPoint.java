@@ -1,5 +1,6 @@
 package com.tasks.task_management.security.authenticationProvider;
 
+import com.tasks.task_management.local.StaticObjects.UserSingleton;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -13,7 +14,7 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         // Log for debugging
-        System.out.println("CustomAuthenticationEntryPoint: Unauthorized access.");
+        System.out.println("CustomAuthenticationEntryPoint: Unauthorized access. ");
 
         // Handle error in a way that ControllerAdvice can also catch if needed
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: " + authException.getMessage());

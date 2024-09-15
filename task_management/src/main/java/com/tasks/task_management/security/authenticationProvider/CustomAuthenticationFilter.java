@@ -24,8 +24,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             UserSingleton user;
             String token = authorizationHeader.substring(7);
-            Requests.validateToken(token);
             try {
+                Requests.validateToken(token);
                 user = UserSingleton.getInstance();
                 if (user.getEmail() != null) {
                     UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);

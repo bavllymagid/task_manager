@@ -16,13 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
-
-    private final CustomAuthEntryPoint authEntryPoint;
-
-    public SecurityConfig(CustomAuthEntryPoint authEntryPoint) {
-        this.authEntryPoint = authEntryPoint;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authConfig) throws Exception {
         AuthenticationManager authManager = authConfig.getAuthenticationManager();
@@ -32,14 +25,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(HttpMethod.POST, "/api/task/receive_instance").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/task/create").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.DELETE,"/api/task/delete/**").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.PUT,"/api/task/update").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.POST,"/api/task/create").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.GET,"/api/task/get/user_tasks/**").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(authEntryPoint))
-                .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults());
-
+                .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.httpBasic(Customizer.withDefaults());
         return http.build();
     }
 
