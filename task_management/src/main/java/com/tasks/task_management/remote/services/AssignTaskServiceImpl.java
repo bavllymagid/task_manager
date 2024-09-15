@@ -1,6 +1,7 @@
 package com.tasks.task_management.remote.services;
 
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
+import com.tasks.task_management.local.exceptions.AssignmentHappenedBeforeException;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,7 +31,10 @@ public class AssignTaskServiceImpl implements AssignTaskService {
     }
 
     @Override
-    public void assignTask(BigInteger taskId, BigInteger userId) throws TaskNotFoundException {
+    public void assignTask(BigInteger taskId, BigInteger userId) throws TaskNotFoundException, AssignmentHappenedBeforeException {
+        if (assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)) {
+            throw new AssignmentHappenedBeforeException("Task already assigned to user");
+        }
         TaskAssignment taskAssignment = new TaskAssignment();
         taskAssignment.setTask(taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found")));
         taskAssignment.setUserId(userId);
@@ -39,17 +44,39 @@ public class AssignTaskServiceImpl implements AssignTaskService {
 
     @Override
     public void unassignTask(BigInteger taskId, BigInteger userId) throws TaskNotFoundException{
+        if(!assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId))
+            throw new TaskNotFoundException("Task not found");
         assignmentRepository.deleteByTask_TaskIdAndUserId(taskId, userId);
     }
 
     @Override
-    public void assignTaskToAll(List<BigInteger> userIds, BigInteger taskId) {
-
+    public void assignTaskToAll(List<BigInteger> userIds, BigInteger taskId) throws TaskNotFoundException{
+        List<TaskAssignment> taskAssignments = new ArrayList<>();
+        for (BigInteger userId : userIds) {
+            if(!assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)) {
+                TaskAssignment taskAssignment = new TaskAssignment();
+                taskAssignment.setTask(taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found")));
+                taskAssignment.setUserId(userId);
+                taskAssignment.setAssignedBy(UserSingleton.getInstance().getId());
+                taskAssignments.add(taskAssignment);
+            }
+        }
+        assignmentRepository.saveAll(taskAssignments);
     }
 
     @Override
-    public void unassignTaskFromAll(List<BigInteger> userIds, BigInteger taskId) {
+    public void unassignTaskFromAll(List<BigInteger> userIds, BigInteger taskId) throws TaskNotFoundException {
+        for (BigInteger userId : userIds) {
+            if(assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId))
+                unassignTask(taskId, userId);
+        }
+    }
 
+    @Override
+    public void unassignAllTasks(BigInteger userId) throws TaskNotFoundException {
+        if(!assignmentRepository.existsByUserId(userId))
+            throw new TaskNotFoundException("Task not found");
+        assignmentRepository.deleteByUserId(userId);
     }
 
     @Override

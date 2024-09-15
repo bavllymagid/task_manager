@@ -77,4 +77,35 @@ public class TaskController {
         return ResponseEntity.ok(assignTaskService.getUserAssignedTasks(userId, page, size));
     }
 
+    @DeleteMapping("/unassign/{taskId}/{userId}")
+    public ResponseEntity<String> unassignTask(@RequestHeader("Authorization") String token,
+                                               @PathVariable BigInteger taskId,
+                                               @PathVariable BigInteger userId) {
+        assignTaskService.unassignTask(taskId, userId);
+        return ResponseEntity.ok("Task unassigned");
+    }
+
+    @PostMapping("/assign/all/{taskId}")
+    public ResponseEntity<String> assignTaskToAll(@RequestHeader("Authorization") String token,
+                                                  @PathVariable BigInteger taskId,
+                                                  @RequestBody List<BigInteger> userIds) {
+        assignTaskService.assignTaskToAll(userIds, taskId);
+        return ResponseEntity.ok("Task assigned to all");
+    }
+
+    @DeleteMapping("/unassign/all/{taskId}")
+    public ResponseEntity<String> unassignTaskFromAll(@RequestHeader("Authorization") String token,
+                                                      @PathVariable BigInteger taskId,
+                                                      @RequestBody List<BigInteger> userIds) {
+        assignTaskService.unassignTaskFromAll(userIds, taskId);
+        return ResponseEntity.ok("Task unassigned from all");
+    }
+
+    @DeleteMapping("/unassign/all/task/{userId}")
+    public ResponseEntity<String> unassignAllTasks(@RequestHeader("Authorization") String token,
+                                                   @PathVariable BigInteger userId) {
+        assignTaskService.unassignAllTasks(userId);
+        return ResponseEntity.ok("All tasks unassigned");
+    }
+
 }

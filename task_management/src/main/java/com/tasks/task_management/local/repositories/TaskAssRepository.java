@@ -2,6 +2,7 @@ package com.tasks.task_management.local.repositories;
 
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +16,11 @@ import java.math.BigInteger;
 public interface TaskAssRepository extends JpaRepository<TaskAssignment, BigInteger> {
     @Query("SELECT t FROM Task t JOIN TaskAssignment ta ON t.taskId = ta.task.taskId WHERE ta.userId = :userId")
     Page<Task> findAllByUserId(@Param("userId") BigInteger userId, Pageable pageable);
+    @Transactional
     void deleteByTask_TaskIdAndUserId(BigInteger taskId, BigInteger userId);
+    boolean existsByTask_TaskIdAndUserId(BigInteger taskId, BigInteger userId);
+    @Transactional
+    void deleteByUserId(BigInteger userId);
+    boolean existsByUserId(BigInteger userId);
+
 }
