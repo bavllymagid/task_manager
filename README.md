@@ -109,18 +109,6 @@ spring.datasource.password=(your_password)
       "password": "@examplePassword1"
     }
     ```
-- **Response**:
-    ```json
-    {
-      "message": "User registered successfully",
-      "user": {
-        "id": 1,
-        "username": "exampleUsername",
-        "email": "exampleEmail@example.com",
-        "roles": []
-      }
-    }
-    ```
 
 #### Login a User
 
@@ -133,17 +121,12 @@ spring.datasource.password=(your_password)
       "password": "@examplePassword1"
     }
     ```
-- **Response**:
-    ```json
-    {
-      "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-    }
-    ```
 
 #### Update User
 
 - **Endpoint**: `PUT /api/users/update`
 - **Description**: Updates user information.
+- **Authentication**: Bearer Token
 - **Request Body**:
     ```json
     {
@@ -152,71 +135,132 @@ spring.datasource.password=(your_password)
       "password": "@examplePassword1"
     }
     ```
-- **Response**:
-    ```json
-    {
-      "message": "User updated successfully"
-    }
-    ```
 
 #### Delete User
 
 - **Endpoint**: `DELETE /api/users/delete`
 - **Description**: Deletes a user.
+- **Authentication**: Bearer Token
 - **Request**:
     - **Query Parameter**: `email=exampleEmail@example.com`
-- **Response**:
-    ```json
-    {
-      "message": "User deleted successfully"
-    }
-    ```
 
 #### Get All Users
 
 - **Endpoint**: `GET /api/users/get_users`
+- **Authentication**: Bearer Token
 - **Description**: Retrieves all users.
-- **Response**:
-    ```json
-    [
-      {
-        "id": 1,
-        "username": "exampleUsername",
-        "email": "exampleEmail@example.com",
-        "roles": []
-      }
-    ]
-    ```
 
 ### 1.2 Token Management
 
 #### Validate Token
 
 - **Endpoint**: `GET /api/token/validate`
+- **Authentication**: Bearer Token
 - **Description**: Validates a JWT token.
-- **Response**:
-    ```json
-    {
-      "valid": true
-    }
-    ```
 
 #### Refresh Token
 
 - **Endpoint**: `GET /api/token/refresh`
+- **Authentication**: Bearer Token
 - **Description**: Refreshes the access token.
-- **Response**:
-    ```json
-    {
-      "token": "newGeneratedToken"
-    }
-    ```
 
 
 
 ## 2. Task Management Service
 
-#### TODO
+### 2.1 Task Management
+#### Create Task
+
+- Endpoint: **POST /api/task/create**
+- Authentication: Bearer Token
+- Description: Creates a new task.
+- Request Body:
+```json
+
+{
+"title": "Sample Task Title",
+"description": "This is a detailed description of the task.",
+"status": "In Progress",
+"dueDate": "2024-10-15T12:45:00"
+} 
+```
+#### Get User Created Tasks
+
+- Endpoint: **GET /api/task/get/user_tasks/{userId}**
+- Authentication: Bearer Token
+- Query Parameters:
+  - page: Page number (default: 0)
+  - size: Page size (default: 20)
+- Description: Retrieves tasks created by a specific user.
+
+#### Get Task By ID
+- Endpoint: **GET /api/task/get/{taskId}**
+- Authentication: Bearer Token
+- Description: Retrieves a task by ID.
+
+#### Update Task
+- Endpoint: **PUT /api/task/update**
+- Authentication: Bearer Token
+- Description: Updates task details.
+- Request Body:
+```json
+{
+  "taskId": 1,
+  "title": "New Title",
+  "description": "Updated task description.",
+  "status": "Completed",
+  "dueDate": "2024-11-15T12:45:00"
+}
+```
+
+#### Delete Task
+- Endpoint: **DELETE /api/task/delete/{taskId}**
+- Authentication: Bearer Token
+- Description: Deletes a task.
+
+### 2.2 Task Assignment
+
+#### Assign Task to User
+- Endpoint: **POST /api/task/assign/{taskId}/{userId}**
+- Authentication: Bearer Token
+- Description: Assigns a task to a user.
+
+#### Get User Assigned Tasks
+- Endpoint: **GET /api/task/get/user_assigned_tasks/{userId}**
+- Authentication: Bearer Token
+- Query Parameters:
+  - page: Page number (default: 0)
+  - size: Page size (default: 20)
+- Description: Retrieves tasks assigned to a specific user.
+
+#### Unassign Task
+- Endpoint: **DELETE /api/task/unassign/{taskId}/{userId}**
+- Authentication: Bearer Token
+- Description: Unassigns a task from a user.
+
+#### Assign Task to Multiple Users
+
+- Endpoint: **POST /api/task/assign/all/{taskId}**
+- Description: Assigns a task to multiple users.
+- Authentication: Bearer Token
+- Request Body:
+```json
+[1, 2, 3]
+```
+
+#### Unassign Task from Multiple Users
+- Endpoint: DELETE /api/task/unassign/all/{taskId}
+- Description: Unassigns a task from multiple users.
+- Authentication: Bearer Token
+- Request Body:
+```json
+[1, 2]
+```
+
+#### Unassign All Tasks from User
+- Endpoint: **DELETE /api/task/unassign/all/task/{userId}**
+- Description: Unassigns all tasks from a user.
+- Authentication: Bearer Token
 
 --- 
 
