@@ -31,25 +31,6 @@ public class AssignTaskServiceImpl implements AssignTaskService {
     }
 
     @Override
-    public void assignTask(BigInteger taskId, BigInteger userId) throws TaskNotFoundException, AssignmentHappenedBeforeException {
-        if (assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)) {
-            throw new AssignmentHappenedBeforeException("Task already assigned to user");
-        }
-        TaskAssignment taskAssignment = new TaskAssignment();
-        taskAssignment.setTask(taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found")));
-        taskAssignment.setUserId(userId);
-        taskAssignment.setAssignedBy(UserSingleton.getInstance().getId());
-        assignmentRepository.save(taskAssignment);
-    }
-
-    @Override
-    public void unassignTask(BigInteger taskId, BigInteger userId) throws TaskNotFoundException{
-        if(!assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId))
-            throw new TaskNotFoundException("Task not found");
-        assignmentRepository.deleteByTask_TaskIdAndUserId(taskId, userId);
-    }
-
-    @Override
     public void assignTaskToAll(List<BigInteger> userIds, BigInteger taskId) throws TaskNotFoundException{
         List<TaskAssignment> taskAssignments = new ArrayList<>();
         for (BigInteger userId : userIds) {
@@ -67,8 +48,11 @@ public class AssignTaskServiceImpl implements AssignTaskService {
     @Override
     public void unassignTaskFromAll(List<BigInteger> userIds, BigInteger taskId) throws TaskNotFoundException {
         for (BigInteger userId : userIds) {
-            if(assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId))
-                unassignTask(taskId, userId);
+            if(assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)){
+                assignmentRepository.deleteByTask_TaskIdAndUserId(taskId, userId);
+            }
+            else
+                throw new TaskNotFoundException("Task not found");
         }
     }
 
