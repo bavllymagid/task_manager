@@ -37,22 +37,21 @@ public class AssignTaskServiceImpl implements AssignTaskService {
     @Override
     public void assignTaskToAll(List<BigInteger> userIds, BigInteger taskId) throws TaskNotFoundException{
         List<TaskAssignment> taskAssignments = new ArrayList<>();
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found"));
         for (BigInteger userId : userIds) {
             if(!assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)) {
                 TaskAssignment taskAssignment = new TaskAssignment();
-                taskAssignment.setTask(taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found")));
+                taskAssignment.setTask(task);
                 taskAssignment.setUserId(userId);
                 taskAssignment.setAssignedBy(UserSingleton.getInstance().getId());
                 taskAssignments.add(taskAssignment);
             }
+            else
+                throw new TaskNotFoundException("Task not found or already assigned");
         }
         assignmentRepository.saveAll(taskAssignments);
 
-        Task[] tasks = new Task[taskAssignments.size()];
-        for (int i = 0; i < taskAssignments.size(); i++) {
-            tasks[i] = taskAssignments.get(i).getTask();
-        }
-        addNotification("Task assigned to you", NotificationType.ASSIGNED.name(), userIds, tasks);
+        addNotification("Task assigned to you", NotificationType.ASSIGNED.name(), userIds, task);
     }
 
     @Override
