@@ -22,6 +22,8 @@ public interface TaskAssRepository extends JpaRepository<TaskAssignment, BigInte
     boolean existsByTask_TaskIdAndUserId(BigInteger taskId, BigInteger userId);
     @Transactional
     void deleteByUserId(BigInteger userId);
+    @Query("SELECT ta.task FROM TaskAssignment ta WHERE ta.userId = :userId")
+    List<Task> getAllByUserId(BigInteger userId);
     boolean existsByUserId(BigInteger userId);
     @Query("SELECT ta.userId FROM TaskAssignment ta WHERE ta.task.taskId = :taskId")
     List<BigInteger> findAllUserIdByTask_TaskId(BigInteger taskId);

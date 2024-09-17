@@ -1,8 +1,9 @@
 package com.tasks.task_management.remote.services;
 
+import com.tasks.task_management.local.StaticObjects.NotificationType;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
-import com.tasks.task_management.local.exceptions.AssignmentHappenedBeforeException;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
+import com.tasks.task_management.local.models.Notification;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;
 import com.tasks.task_management.local.repositories.TaskAssRepository;
@@ -22,12 +23,15 @@ public class AssignTaskServiceImpl implements AssignTaskService {
 
     TaskAssRepository assignmentRepository;
     TaskRepository taskRepository;
+    NotificationService notificationService;
 
     @Autowired
     public AssignTaskServiceImpl(TaskAssRepository assignmentRepository,
-                                 TaskRepository taskRepository) {
+                                 TaskRepository taskRepository,
+                                 NotificationService notificationService) {
         this.assignmentRepository = assignmentRepository;
         this.taskRepository = taskRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -43,6 +47,12 @@ public class AssignTaskServiceImpl implements AssignTaskService {
             }
         }
         assignmentRepository.saveAll(taskAssignments);
+
+        Task[] tasks = new Task[taskAssignments.size()];
+        for (int i = 0; i < taskAssignments.size(); i++) {
+            tasks[i] = taskAssignments.get(i).getTask();
+        }
+        addNotification("Task assigned to you", NotificationType.ASSIGNED.name(), userIds, tasks);
     }
 
     @Override
@@ -50,6 +60,7 @@ public class AssignTaskServiceImpl implements AssignTaskService {
         for (BigInteger userId : userIds) {
             if(assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)){
                 assignmentRepository.deleteByTask_TaskIdAndUserId(taskId, userId);
+                addNotification("Task unassigned from you", NotificationType.UNASSIGNED.name(), List.of(userId), taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found")));
             }
             else
                 throw new TaskNotFoundException("Task not found");
@@ -61,11 +72,29 @@ public class AssignTaskServiceImpl implements AssignTaskService {
         if(!assignmentRepository.existsByUserId(userId))
             throw new TaskNotFoundException("Task not found");
         assignmentRepository.deleteByUserId(userId);
+
+        List<Task> tasks = assignmentRepository.getAllByUserId(userId);
+        addNotification("Task unassigned from you", NotificationType.UNASSIGNED.name(), List.of(userId), tasks.toArray(new Task[0]));
     }
 
     @Override
     public Page<Task> getUserAssignedTasks(BigInteger userId, int page, int size) {
         Pageable pageable = PageRequest.of(0, 20);
         return assignmentRepository.findAllByUserId(userId,pageable);
+    }
+
+    void addNotification(String message, String type, List<BigInteger> userId, Task... task) {
+        List<Notification> notifications = new ArrayList<>();
+        for (Task t : task){
+            for (BigInteger id : userId) {
+                Notification notification = new Notification();
+                notification.setMessage(message);
+                notification.setTaskId(t.getTaskId());
+                notification.setUserId(id);
+                notification.setType(type);
+                notifications.add(notification);
+            }
+        }
+        notificationService.generateOnActivityNotification(notifications);
     }
 }
