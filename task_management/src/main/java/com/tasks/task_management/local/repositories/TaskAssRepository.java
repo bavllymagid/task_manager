@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Repository
 public interface TaskAssRepository extends JpaRepository<TaskAssignment, BigInteger> {
@@ -22,5 +23,7 @@ public interface TaskAssRepository extends JpaRepository<TaskAssignment, BigInte
     @Transactional
     void deleteByUserId(BigInteger userId);
     boolean existsByUserId(BigInteger userId);
+    @Query("SELECT ta.userId FROM TaskAssignment ta WHERE ta.task.taskId = :taskId")
+    List<BigInteger> findAllUserIdByTask_TaskId(BigInteger taskId);
 
 }

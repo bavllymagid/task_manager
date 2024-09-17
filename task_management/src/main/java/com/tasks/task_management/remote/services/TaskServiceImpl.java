@@ -1,11 +1,13 @@
 package com.tasks.task_management.remote.services;
 
+import com.tasks.task_management.local.StaticObjects.NotificationType;
+import com.tasks.task_management.local.StaticObjects.TaskStatus;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
 import com.tasks.task_management.local.exceptions.InvalidTokenException;
 import com.tasks.task_management.local.exceptions.PassedDueDateException;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
+import com.tasks.task_management.local.models.Notification;
 import com.tasks.task_management.local.models.Task;
-import com.tasks.task_management.local.models.TaskAssignment;
 import com.tasks.task_management.local.repositories.TaskAssRepository;
 import com.tasks.task_management.local.repositories.TaskRepository;
 import com.tasks.task_management.remote.dto.TaskDto;
@@ -18,18 +20,23 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
     TaskRepository taskRepository;
     TaskAssRepository assignmentRepository;
+    NotificationService notificationService;
 
     @Autowired
     public TaskServiceImpl(TaskRepository taskRepository,
-                           TaskAssRepository assignmentRepository) {
+                           TaskAssRepository assignmentRepository,
+                           NotificationService notificationService) {
         this.taskRepository = taskRepository;
         this.assignmentRepository = assignmentRepository;
+        this.notificationService = notificationService;
     }
 
 
@@ -43,7 +50,7 @@ public class TaskServiceImpl implements TaskService {
             throw new PassedDueDateException("Due date has passed");
         }
         newTask.setDueDate(task.getDueDate());
-        newTask.setStatus(task.getStatus());
+        newTask.setStatus(TaskStatus.PENDING.name());
         taskRepository.save(newTask);
         task.setCreatedAt(LocalDateTime.now());
         task.setUserId(newTask.getUserId());
@@ -57,8 +64,31 @@ public class TaskServiceImpl implements TaskService {
             updatedTask.setTitle(task.getTitle());
             updatedTask.setDescription(task.getDescription());
             updatedTask.setDueDate(task.getDueDate());
-            updatedTask.setStatus(task.getStatus());
             taskRepository.save(updatedTask);
+            addNotification(updatedTask, "Task: " + updatedTask.getTitle() + " updated",
+                    NotificationType.UPDATED.name());
+        } else {
+            throw new TaskNotFoundException("Task not found");
+        }
+    }
+
+    @Override
+    public void updateTaskStatus(BigInteger taskId, String status) throws TaskNotFoundException {
+        switch (status.toLowerCase()) {
+            case "completed":
+                status = TaskStatus.COMPLETED.name();
+                break;
+            case "pending":
+                status = TaskStatus.PENDING.name();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid status");
+        }
+        if(taskRepository.existsById(taskId)) {
+            Task task = taskRepository.findById(taskId).get();
+            taskRepository.updateStatusByTaskId(status, taskId);
+            addNotification(task, "Task: " + task.getTitle() + " status updated to " + status,
+                    NotificationType.UPDATED.name());
         } else {
             throw new TaskNotFoundException("Task not found");
         }
@@ -67,7 +97,10 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTask(BigInteger taskId) throws TaskNotFoundException {
         if(taskRepository.existsById(taskId)) {
+            Task task = taskRepository.findById(taskId).get();
             taskRepository.deleteById(taskId);
+            addNotification(task, "Task: " + task.getTitle() + " unassigned from you",
+                    NotificationType.UNASSIGNED.name());
         } else {
             throw new TaskNotFoundException("Task not found");
         }
@@ -82,5 +115,19 @@ public class TaskServiceImpl implements TaskService {
     public Page<Task> getUserCreatedTasks(BigInteger id, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("dueDate").ascending());
         return taskRepository.findTasksByUserId(id, pageable);
+    }
+
+    void addNotification(Task task, String message, String type) {
+        List<BigInteger> userId = assignmentRepository.findAllUserIdByTask_TaskId(task.getTaskId());
+        List<Notification> notifications = new ArrayList<>();
+        for (BigInteger id : userId) {
+            Notification notification = new Notification();
+            notification.setMessage(message);
+            notification.setTaskId(task.getTaskId());
+            notification.setUserId(id);
+            notification.setType(type);
+            notifications.add(notification);
+        }
+        notificationService.generateOnActivityNotification(notifications);
     }
 }

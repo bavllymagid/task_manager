@@ -27,9 +27,9 @@ public class Notification {
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "read", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "`read`", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean read;
 
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 }
