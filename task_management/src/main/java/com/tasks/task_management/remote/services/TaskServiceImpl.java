@@ -126,6 +126,7 @@ public class TaskServiceImpl implements TaskService {
             notification.setTaskId(task.getTaskId());
             notification.setUserId(id);
             notification.setType(type);
+            notification.setRead(false);
             notifications.add(notification);
         }
         notificationService.generateOnActivityNotification(notifications);

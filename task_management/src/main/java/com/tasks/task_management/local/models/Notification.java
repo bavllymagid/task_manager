@@ -27,7 +27,7 @@ public class Notification {
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "`read`", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "`read`", columnDefinition = "BOOLEAN DEFAULT FALSE", nullable = false)
     private Boolean read;
 
     @Column(name = "created_at", updatable = false, insertable = false)

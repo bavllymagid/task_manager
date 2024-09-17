@@ -91,6 +91,7 @@ public class AssignTaskServiceImpl implements AssignTaskService {
                 notification.setTaskId(t.getTaskId());
                 notification.setUserId(id);
                 notification.setType(type);
+                notification.setRead(false);
                 notifications.add(notification);
             }
         }
