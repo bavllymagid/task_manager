@@ -10,4 +10,5 @@ public interface NotificationService {
     void sendNotification(String message, String userId);
     void generateDueDateNotification();
     void generateOnActivityNotification(List<Notification> notifications);
+    void deleteNotificationsEvery3Days();
 }

@@ -67,4 +67,12 @@ public class NotificationServiceImpl implements NotificationService {
     public void generateOnActivityNotification(List<Notification> notifications) {
         notificationRepository.saveAll(notifications);
     }
+
+    @Override
+    @Scheduled(fixedRate = 259200000) // 259200000 milliseconds = 3 days
+    public void deleteNotificationsEvery3Days() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threeDaysAgo = now.minusDays(3);
+        notificationRepository.deleteByCreatedAtBefore(threeDaysAgo);
+    }
 }
