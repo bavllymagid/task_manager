@@ -11,4 +11,5 @@ import java.math.BigInteger;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, BigInteger> {
     Page<Notification> findByUserId(BigInteger userId, Pageable pageable);
+    boolean existsByUserIdAndTaskId(BigInteger userId, BigInteger taskId);
 }

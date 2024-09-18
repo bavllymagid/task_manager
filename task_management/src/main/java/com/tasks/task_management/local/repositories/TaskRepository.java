@@ -29,8 +29,7 @@ public interface TaskRepository extends JpaRepository<Task, BigInteger> {
     @Query("update Task t set t.status = ?1 where t.taskId = ?2")
     void updateStatusByTaskId(String status, BigInteger taskId);
 
-    @Query("SELECT t FROM Task t WHERE t.dueDate <= :nextDay AND t.dueDate >= :now AND t.userId = :userId")
+    @Query("SELECT t FROM Task t WHERE t.dueDate < :nextDay AND t.dueDate > :now")
     List<Task> findTasksDueWithinADayByUserId(@Param("now") LocalDateTime now,
-                                              @Param("nextDay") LocalDateTime nextDay,
-                                              @Param("userId") BigInteger userId);
+                                              @Param("nextDay") LocalDateTime nextDay);
 }
