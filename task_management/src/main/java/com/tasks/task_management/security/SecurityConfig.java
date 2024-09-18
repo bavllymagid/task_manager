@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST,"/api/task/assign/**").hasRole(RolesConst.USER.name())
                                 .requestMatchers(HttpMethod.GET,"/api/task/get/user_assigned_tasks/**").hasRole(RolesConst.USER.name())
                                 .requestMatchers("/api/task/unassign/**").hasRole(RolesConst.USER.name())
+                                .requestMatchers("/api/task/notification/**").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

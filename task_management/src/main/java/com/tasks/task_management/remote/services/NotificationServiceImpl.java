@@ -8,6 +8,10 @@ import com.tasks.task_management.local.repositories.NotificationRepository;
 import com.tasks.task_management.local.repositories.TaskAssRepository;
 import com.tasks.task_management.local.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +37,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendNotification(String message, String userId) {
-
-
+    public Page<Notification> sendNotification(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return notificationRepository.findAllByUserId(UserSingleton.getInstance().getId(), pageable);
     }
 
     @Override
@@ -74,5 +78,12 @@ public class NotificationServiceImpl implements NotificationService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime threeDaysAgo = now.minusDays(3);
         notificationRepository.deleteByCreatedAtBefore(threeDaysAgo);
+    }
+
+    @Override
+    public Notification updateNotificationStatus(BigInteger notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).get();
+        notification.setRead(true);
+        return notificationRepository.save(notification);
     }
 }

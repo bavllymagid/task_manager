@@ -98,9 +98,9 @@ public class TaskServiceImpl implements TaskService {
     public void deleteTask(BigInteger taskId) throws TaskNotFoundException {
         if(taskRepository.existsById(taskId)) {
             Task task = taskRepository.findById(taskId).get();
-            taskRepository.deleteById(taskId);
             addNotification(task, "Task: " + task.getTitle() + " unassigned from you",
                     NotificationType.UNASSIGNED.name());
+            taskRepository.deleteById(taskId);
         } else {
             throw new TaskNotFoundException("Task not found");
         }

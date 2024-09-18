@@ -11,10 +11,11 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, BigInteger> {
-    Page<Notification> findByUserId(BigInteger userId, Pageable pageable);
+    Page<Notification> findAllByUserId(BigInteger userId, Pageable pageable);
     boolean existsByUserIdAndTaskId(BigInteger userId, BigInteger taskId);
     @Transactional
     @Modifying
