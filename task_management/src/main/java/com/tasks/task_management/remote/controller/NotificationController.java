@@ -26,7 +26,7 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.sendNotification(page, size));
     }
 
-    @GetMapping("/update_status")
+    @PutMapping("/update_status")
     public ResponseEntity<Notification> updateNotificationStatus(@RequestHeader("Authorization") String token,
                                                                  @RequestParam("notificationId") BigInteger notificationId) {
         return ResponseEntity.ok(notificationService.updateNotificationStatus(notificationId));

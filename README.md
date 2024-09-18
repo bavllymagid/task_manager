@@ -221,9 +221,13 @@ spring.datasource.password=(your_password)
 ### 2.2 Task Assignment
 
 #### Assign Task to User
-- Endpoint: **POST /api/task/assign/{taskId}/{userId}**
+- Endpoint: **POST /api/task/assign/{taskId}**
 - Authentication: Bearer Token
 - Description: Assigns a task to a user.
+- Request Body:
+```json
+[1, 2, 3]
+```
 
 #### Get User Assigned Tasks
 - Endpoint: **GET /api/task/get/user_assigned_tasks/{userId}**
@@ -234,34 +238,36 @@ spring.datasource.password=(your_password)
 - Description: Retrieves tasks assigned to a specific user.
 
 #### Unassign Task
-- Endpoint: **DELETE /api/task/unassign/{taskId}/{userId}**
+- Endpoint: **DELETE /api/task/unassign/{taskId}**
 - Authentication: Bearer Token
 - Description: Unassigns a task from a user.
-
-#### Assign Task to Multiple Users
-
-- Endpoint: **POST /api/task/assign/all/{taskId}**
-- Description: Assigns a task to multiple users.
-- Authentication: Bearer Token
 - Request Body:
 ```json
 [1, 2, 3]
 ```
 
-#### Unassign Task from Multiple Users
-- Endpoint: DELETE /api/task/unassign/all/{taskId}
-- Description: Unassigns a task from multiple users.
-- Authentication: Bearer Token
-- Request Body:
-```json
-[1, 2]
-```
 
 #### Unassign All Tasks from User
 - Endpoint: **DELETE /api/task/unassign/all/task/{userId}**
 - Description: Unassigns all tasks from a user.
 - Authentication: Bearer Token
 
+### 2.3 Notification Management
+
+#### Get User Notifications
+- Endpoint: **GET /api/task/notification/send**
+- Authentication: Bearer Token
+- Description: Sends notifications to user.
+- Query Parameters:
+  - size: Page size (default: 20)
+  - page: Page number (default: 0)
+
+#### Update Read Status
+- Endpoint: **PUT /api/task/notification/update_status**
+- Authentication: Bearer Token
+- Description: Updates notification read status.
+- Query Parameters:
+  - notificationId: Notification ID
 --- 
 
 ## Contributing
