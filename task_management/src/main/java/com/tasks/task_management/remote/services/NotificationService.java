@@ -10,6 +10,6 @@ public interface NotificationService {
     Page<Notification> sendNotification(int page, int size);
     void generateDueDateNotification();
     void generateOnActivityNotification(List<Notification> notifications);
-    void deleteNotificationsEvery3Days();
+    void deleteNotificationsEveryNDays();
     Notification updateNotificationStatus(BigInteger notificationId);
 }
