@@ -7,7 +7,7 @@ import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
-import com.tasks.user_management.utils.exceptions.UserNotFound;
+import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.SendUserDto;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -55,11 +55,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
 
     private String saveAccessToken(String email) {
         try {
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFound("User not found"));
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
             user.setSecretToken(RandomStringUtils.randomAlphanumeric(12));
             userRepository.save(user);
             return user.getSecretToken();
-        } catch (UserNotFound e) {
+        } catch (UserNotFoundException e) {
             log.error(e.getMessage());
             return "";
         }
@@ -92,9 +92,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public User getUserFromToken(String token) throws UserNotFound{
+    public User getUserFromToken(String token) throws UserNotFoundException {
         Optional<User> user = userRepository.findByEmail(JWT.decode(token).getSubject());
-        if(user.isEmpty()) throw new UserNotFound("User Not Found");
+        if(user.isEmpty()) throw new UserNotFoundException("User Not Found");
         return user.get();
     }
 

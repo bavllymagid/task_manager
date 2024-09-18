@@ -25,7 +25,7 @@ public class UserSingleton {
         return instance;
     }
 
-    public static void setInstance(UserInstance userInstance) {
+    public static synchronized void setInstance(UserInstance userInstance) {
         instance = new UserSingleton();
         instance.setId(userInstance.id());
         instance.setEmail(userInstance.email());

@@ -9,14 +9,12 @@ import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
-import com.tasks.user_management.utils.exceptions.UserNotFound;
+import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService{
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     UserRepository userRepository;
     RefreshTokenRepository refreshTokenRepository;
@@ -79,19 +76,19 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void deleteUser(String email, String token) throws TokenValidationException, UserNotFound {
+    public void deleteUser(String email, String token) throws TokenValidationException, UserNotFoundException {
         if(refreshTokenService.validateToken(token) == null) throw new TokenValidationException("Invalid token");
         userRepository.deleteByEmail(email);
     }
 
     @Override
     @Transactional
-    public UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFound {
+    public UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFoundException {
         if(refreshTokenService.validateToken(token) == null ) throw new TokenValidationException("Invalid token");
 
         Optional<User> user = userRepository.findByEmail(userDto.getEmail());
         if (user.isEmpty()) {
-            throw new UserNotFound("User with email " + userDto.getEmail() + " not found.");
+            throw new UserNotFoundException("User with email " + userDto.getEmail() + " not found.");
         }
         user.get().setUsername(userDto.getUsername());
         user.get().setPassword(passwordEncoder.encode(userDto.getPassword()));

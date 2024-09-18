@@ -3,7 +3,7 @@ package com.tasks.user_management.security.jwt;
 import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.services.RefreshTokenService;
-import com.tasks.user_management.utils.exceptions.UserNotFound;
+import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             User user = null;
             try {
                 user = refreshTokenService.getUserFromToken(token);
-            } catch (UserNotFound e) {
+            } catch (UserNotFoundException e) {
                 throw new RuntimeException("User Not Found");
             }
             if (user.getEmail() != null) {
