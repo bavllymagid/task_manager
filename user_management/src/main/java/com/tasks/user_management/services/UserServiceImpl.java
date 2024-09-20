@@ -1,5 +1,6 @@
 package com.tasks.user_management.services;
 
+import com.auth0.jwt.JWT;
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
@@ -7,7 +8,6 @@ import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.local.repositories.UserRolesRepository;
 import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
-import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.jwt.JwtUtil;
@@ -113,7 +113,9 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void logoutUser(String token, String email){
+    public void logoutUser(String token){
+        token = token.substring(7);
+        String email = JWT.decode(token).getSubject();
         userRepository.updateSecretTokenByEmail(email, "");
         refreshTokenRepository.deleteByUserEmail(email);
     }

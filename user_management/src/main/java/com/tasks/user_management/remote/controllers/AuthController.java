@@ -8,8 +8,10 @@ import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.payload.LoginDto;
+import com.tasks.user_management.utils.payload.RoleChangeDto;
 import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,7 @@ public class AuthController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String token,
-                                             @RequestParam("email") String email) throws UserNotFoundException, TokenValidationException {
+                                             @Email @RequestParam("email") String email) throws UserNotFoundException, TokenValidationException {
         userService.deleteUser(email, token);
         return ResponseEntity.ok("User deleted successfully.");
     }
@@ -78,17 +80,16 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<String> logoutUser(@RequestHeader("Authorization") String token,
-                                             @RequestParam("email") String email) throws TokenValidationException {
-        userService.logoutUser(token, email);
+    public ResponseEntity<String> logoutUser(@RequestHeader("Authorization") String token) throws TokenValidationException {
+        userService.logoutUser(token);
         return ResponseEntity.ok("User logged out successfully.");
     }
 
     @PutMapping("/add_role")
     public ResponseEntity<UserDto> addRoleToUser(@RequestHeader("Authorization") String token,
                                                  @RequestParam("email") String email,
-                                                 @RequestParam("role") String role) throws TokenValidationException, UserNotFoundException {
-        return ResponseEntity.ok(userService.addRoleToUser(email, role, token));
+                                                 @Valid @RequestBody RoleChangeDto role) throws TokenValidationException, UserNotFoundException {
+        return ResponseEntity.ok(userService.addRoleToUser(email, role.getRole(), token));
     }
 
 }
