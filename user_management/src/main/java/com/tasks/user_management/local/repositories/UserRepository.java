@@ -1,6 +1,7 @@
 package com.tasks.user_management.local.repositories;
 
 import com.tasks.user_management.local.models.User;
+import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,5 +22,5 @@ public interface UserRepository extends JpaRepository<User, BigInteger>{
     @Query("update User u set u.secretToken = ?2 where u.email = ?1")
     void updateSecretTokenByEmail(String email, String secretToken);
     @Transactional
-    void deleteByEmail(String email);
+    void deleteByEmail(String email) throws UserNotFoundException;
 }

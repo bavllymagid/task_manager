@@ -11,7 +11,11 @@ DROP TABLE IF EXISTS notifications;
 -- drop tasks table --
 DROP TABLE IF EXISTS tasks; 
 -- drop users table --
-DROP TABLE IF EXISTS users; 
+DROP TABLE IF EXISTS users;
+-- drop groups table --
+DROP TABLE IF EXISTS groups;
+-- drop user_groups table --
+DROP TABLE IF EXISTS user_groups;
 
 
 -- ====---------------- Authentication Service ----------------==== --
@@ -27,6 +31,21 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_users_email ON users(email);
+
+-- create group table --
+CREATE TABLE groups (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- create user_groups table --
+CREATE TABLE user_groups (
+    group_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, group_id),
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
 -- create roles table --
 CREATE TABLE roles (

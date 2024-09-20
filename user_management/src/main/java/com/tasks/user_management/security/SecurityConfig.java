@@ -1,6 +1,7 @@
 package com.tasks.user_management.security;
 
-import com.tasks.user_management.security.jwt.JwtAuthenticationFilter;
+import com.tasks.user_management.security.config.JwtAuthenticationFilter;
+import com.tasks.user_management.security.config.UserEntryPoint;
 import com.tasks.user_management.utils.RolesConst;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +22,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserEntryPoint userEntryPoint;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          UserEntryPoint userEntryPoint) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.userEntryPoint = userEntryPoint;
     }
 
     @Bean
@@ -36,13 +40,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/admin/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/token/validate").hasAnyRole(RolesConst.USER.name())
-                                .requestMatchers(HttpMethod.GET, "/api/token/refresh").hasAnyRole(RolesConst.USER.name())
-                                .requestMatchers(HttpMethod.GET, "/api/users/get_user").hasAnyRole(RolesConst.USER.name())
-                                .requestMatchers(HttpMethod.PUT, "/api/users/update").hasAnyRole(RolesConst.USER.name())
-                                .requestMatchers(HttpMethod.DELETE, "/api/users/delete").hasAnyRole(RolesConst.USER.name())
+                                .requestMatchers("/api/token/**").hasAnyRole(RolesConst.USER.name())
+                                .requestMatchers("/api/users/**").hasAnyRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(userEntryPoint))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
 

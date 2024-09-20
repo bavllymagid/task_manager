@@ -76,16 +76,13 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void deleteUser(String email, String token) throws TokenValidationException, UserNotFoundException {
-        if(refreshTokenService.validateToken(token) == null) throw new TokenValidationException("Invalid token");
+    public void deleteUser(String email, String token) throws UserNotFoundException {
         userRepository.deleteByEmail(email);
     }
 
     @Override
     @Transactional
-    public UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFoundException {
-        if(refreshTokenService.validateToken(token) == null ) throw new TokenValidationException("Invalid token");
-
+    public UserDto updateUser(UserDto userDto, String token) throws UserNotFoundException {
         Optional<User> user = userRepository.findByEmail(userDto.getEmail());
         if (user.isEmpty()) {
             throw new UserNotFoundException("User with email " + userDto.getEmail() + " not found.");
@@ -97,15 +94,46 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserDto> getListOfUsers(String token)throws TokenValidationException{
-
-        if(refreshTokenService.validateToken(token) == null) throw new TokenValidationException("Invalid Token");
-
+    public List<UserDto> getListOfUsers(String token){
         List<User> users = userRepository.findAll();
         List<UserDto> usersDto = new ArrayList<>();
         for (User user : users){
             usersDto.add(new UserDto(user.getId(), user.getUsername(), user.getEmail(), ""));
         }
         return usersDto;
+    }
+
+    @Override
+    public UserDto getUser(String email, String token) throws UserNotFoundException {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found.");
+        }
+        return new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), "");
+    }
+
+    @Override
+    public void logoutUser(String token, String email){
+        userRepository.updateSecretTokenByEmail(email, "");
+        refreshTokenRepository.deleteByUserEmail(email);
+    }
+
+    @Override
+    public UserDto addRoleToUser(String email, String role, String token) throws UserNotFoundException {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found.");
+        }
+        user.get().getUserRoles().add(userRolesRepository.findByName(getRole(role)));
+        userRepository.save(user.get());
+        return new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), "");
+    }
+
+    private String getRole(String role){
+        return switch (role.toUpperCase()) {
+            case "ADMIN" -> RolesConst.ADMIN.name();
+            case "MANAGER" -> RolesConst.MANAGER.name();
+            default -> RolesConst.USER.name();
+        };
     }
 }

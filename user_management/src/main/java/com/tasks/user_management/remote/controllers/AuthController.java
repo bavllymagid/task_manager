@@ -10,6 +10,7 @@ import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
+import jakarta.validation.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,28 @@ public class AuthController {
     @GetMapping("/get_users")
     public ResponseEntity<List<UserDto>> getUsers(@RequestHeader("Authorization") String token) throws TokenValidationException {
         return ResponseEntity.ok(userService.getListOfUsers(token));
+    }
+
+    @GetMapping("/get_user")
+    public ResponseEntity<UserDto> getUser(@RequestHeader("Authorization") String token,
+                                          @RequestParam("email")
+                                          @Email
+                                          String email) throws TokenValidationException, UserNotFoundException {
+        return ResponseEntity.ok(userService.getUser(email, token));
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> logoutUser(@RequestHeader("Authorization") String token,
+                                             @RequestParam("email") String email) throws TokenValidationException {
+        userService.logoutUser(token, email);
+        return ResponseEntity.ok("User logged out successfully.");
+    }
+
+    @PutMapping("/add_role")
+    public ResponseEntity<UserDto> addRoleToUser(@RequestHeader("Authorization") String token,
+                                                 @RequestParam("email") String email,
+                                                 @RequestParam("role") String role) throws TokenValidationException, UserNotFoundException {
+        return ResponseEntity.ok(userService.addRoleToUser(email, role, token));
     }
 
 }

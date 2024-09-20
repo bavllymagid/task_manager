@@ -1,9 +1,12 @@
-package com.tasks.user_management.security.jwt;
+package com.tasks.user_management.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.services.RefreshTokenService;
+import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
+import com.tasks.user_management.utils.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,14 +21,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RefreshTokenService refreshTokenService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public JwtAuthenticationFilter(RefreshTokenService refreshTokenService) {
+    public JwtAuthenticationFilter(RefreshTokenService refreshTokenService,
+                                   JwtUtil jwtUtil) {
         this.refreshTokenService = refreshTokenService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -36,12 +43,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             User user = null;
             try {
                 user = refreshTokenService.getUserFromToken(token);
+                jwtUtil.validateToken(token, user.getSecretToken());
+                if (user.getEmail() != null) {
+                    UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             } catch (UserNotFoundException e) {
-                throw new RuntimeException("User Not Found");
-            }
-            if (user.getEmail() != null) {
-                UsernamePasswordAuthenticationToken authentication = getUsernamePasswordAuthenticationToken(user);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                request.setAttribute("exception message", "User Not Found");
+                request.setAttribute("exception status", HttpServletResponse.SC_BAD_REQUEST);
+            } catch (TokenValidationException e){
+                request.setAttribute("exception message", "Invalid Token");
+                request.setAttribute("exception status", HttpServletResponse.SC_UNAUTHORIZED);
             }
         }
         filterChain.doFilter(request, response);
@@ -56,5 +68,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
     }
-
 }

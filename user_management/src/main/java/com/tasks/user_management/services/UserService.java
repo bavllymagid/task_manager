@@ -15,4 +15,7 @@ public interface UserService {
     void deleteUser(String email, String token) throws TokenValidationException, UserNotFoundException;
     UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFoundException;
     List<UserDto> getListOfUsers(String token) throws TokenValidationException;
+    UserDto getUser(String email, String token) throws TokenValidationException, UserNotFoundException;
+    void logoutUser(String token, String email) throws TokenValidationException;
+    UserDto addRoleToUser(String email, String role, String token) throws TokenValidationException, UserNotFoundException;
 }
