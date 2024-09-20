@@ -1,3 +1,5 @@
+-- drop user_groups table --
+DROP TABLE IF EXISTS user_groups;
 -- drop user_roles table --
 DROP TABLE IF EXISTS user_roles; 
 -- Drop roles table if needed --
@@ -13,9 +15,8 @@ DROP TABLE IF EXISTS tasks;
 -- drop users table --
 DROP TABLE IF EXISTS users;
 -- drop groups table --
-DROP TABLE IF EXISTS groups;
--- drop user_groups table --
-DROP TABLE IF EXISTS user_groups;
+DROP TABLE IF EXISTS `groups`;
+
 
 
 -- ====---------------- Authentication Service ----------------==== --
@@ -33,7 +34,7 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users(email);
 
 -- create group table --
-CREATE TABLE groups (
+CREATE TABLE `groups` (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(50) NOT NULL UNIQUE
 );
