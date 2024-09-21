@@ -1,5 +1,6 @@
 package com.tasks.task_management.remote.controller;
 
+import com.tasks.task_management.local.StaticObjects.UserSingleton;
 import com.tasks.task_management.local.exceptions.InvalidTokenException;
 import com.tasks.task_management.local.exceptions.PassedDueDateException;
 import com.tasks.task_management.local.exceptions.TaskNotFoundException;
@@ -7,6 +8,7 @@ import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.remote.dto.TaskDto;
 import com.tasks.task_management.remote.services.AssignTaskService;
 import com.tasks.task_management.remote.services.TaskService;
+import com.tasks.task_management.remote.utils.requests.Requests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,9 @@ public class TaskController {
     @PostMapping("/create")
     public ResponseEntity<TaskDto> createTask(@RequestHeader("Authorization") String token,
                                               @RequestBody TaskDto task) throws InvalidTokenException, PassedDueDateException {
+        if(!Requests.changeRole(token, UserSingleton.getInstance().getEmail(), "ADMIN")) {
+            throw new InvalidTokenException("Invalid token");
+        }
         return ResponseEntity.ok(taskService.createTask(task));
     }
 
@@ -44,7 +49,7 @@ public class TaskController {
     @DeleteMapping("/delete/{taskId}")
     public ResponseEntity<String> deleteTask(@RequestHeader("Authorization") String token,
                                              @PathVariable BigInteger taskId) throws TaskNotFoundException {
-        taskService.deleteTask(taskId);
+        taskService.deleteTask(taskId, token);
         return ResponseEntity.ok("Task deleted");
     }
 

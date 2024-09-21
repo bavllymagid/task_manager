@@ -137,7 +137,11 @@ public class UserServiceImpl implements UserService{
         if (user.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found.");
         }
-        user.get().getUserRoles().add(userRolesRepository.findByName(getRole(role)));
+        if(role.equalsIgnoreCase("user")){
+            user.get().setUserRoles(new ArrayList<>(List.of(userRolesRepository.findByName(getRole(role)))));
+        }else {
+            user.get().getUserRoles().add(userRolesRepository.findByName(getRole(role)));
+        }
         userRepository.save(user.get());
         return new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), "");
     }

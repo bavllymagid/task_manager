@@ -87,9 +87,8 @@ public class AuthController {
 
     @PutMapping("/add_role")
     public ResponseEntity<UserDto> addRoleToUser(@RequestHeader("Authorization") String token,
-                                                 @RequestParam("email") String email,
                                                  @Valid @RequestBody RoleChangeDto role) throws TokenValidationException, UserNotFoundException {
-        return ResponseEntity.ok(userService.addRoleToUser(email, role.getRole(), token));
+        return ResponseEntity.ok(userService.addRoleToUser(role.getEmail(), role.getRole(), token));
     }
 
 }

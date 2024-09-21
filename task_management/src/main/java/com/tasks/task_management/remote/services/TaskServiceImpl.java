@@ -11,6 +11,7 @@ import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.repositories.TaskAssRepository;
 import com.tasks.task_management.local.repositories.TaskRepository;
 import com.tasks.task_management.remote.dto.TaskDto;
+import com.tasks.task_management.remote.utils.requests.Requests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -101,13 +102,19 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void deleteTask(BigInteger taskId) throws TaskNotFoundException {
+    public void deleteTask(BigInteger taskId, String token) throws TaskNotFoundException {
         if(taskRepository.existsById(taskId)) {
             Task task = taskRepository.findById(taskId).get();
             if(task.getUserId().equals(UserSingleton.getInstance().getId())) {
                 addNotification(task, "Task: " + task.getTitle() + " unassigned from you",
                         NotificationType.UNASSIGNED.name());
                 taskRepository.deleteById(taskId);
+                
+                if(!taskRepository.existsByUserId(task.getUserId())){
+                    if(!Requests.changeRole(token, UserSingleton.getInstance().getEmail(), "USER")) {
+                        throw new InvalidTokenException("Invalid token");
+                    }
+                }
             }
             else {
                 throw new TaskNotFoundException("Task not found");
