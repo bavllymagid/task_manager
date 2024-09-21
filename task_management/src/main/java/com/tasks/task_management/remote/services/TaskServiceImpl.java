@@ -61,6 +61,9 @@ public class TaskServiceImpl implements TaskService {
     public void updateTask(TaskDto task) throws TaskNotFoundException {
         if(taskRepository.existsById(task.getTaskId())) {
             Task updatedTask = taskRepository.findById(task.getTaskId()).get();
+            if(!updatedTask.getUserId().equals(UserSingleton.getInstance().getId())) {
+                throw new TaskNotFoundException("Task not found");
+            }
             updatedTask.setTitle(task.getTitle());
             updatedTask.setDescription(task.getDescription());
             updatedTask.setDueDate(task.getDueDate());
@@ -86,6 +89,9 @@ public class TaskServiceImpl implements TaskService {
         }
         if(taskRepository.existsById(taskId)) {
             Task task = taskRepository.findById(taskId).get();
+            if(!task.getUserId().equals(UserSingleton.getInstance().getId())) {
+                throw new TaskNotFoundException("Task not found");
+            }
             taskRepository.updateStatusByTaskId(status, taskId);
             addNotification(task, "Task: " + task.getTitle() + " status updated to " + status,
                     NotificationType.UPDATED.name());
@@ -98,9 +104,14 @@ public class TaskServiceImpl implements TaskService {
     public void deleteTask(BigInteger taskId) throws TaskNotFoundException {
         if(taskRepository.existsById(taskId)) {
             Task task = taskRepository.findById(taskId).get();
-            addNotification(task, "Task: " + task.getTitle() + " unassigned from you",
-                    NotificationType.UNASSIGNED.name());
-            taskRepository.deleteById(taskId);
+            if(task.getUserId().equals(UserSingleton.getInstance().getId())) {
+                addNotification(task, "Task: " + task.getTitle() + " unassigned from you",
+                        NotificationType.UNASSIGNED.name());
+                taskRepository.deleteById(taskId);
+            }
+            else {
+                throw new TaskNotFoundException("Task not found");
+            }
         } else {
             throw new TaskNotFoundException("Task not found");
         }
@@ -108,7 +119,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteAllTasks(BigInteger userId){
-        if(taskRepository.existsByUserId(userId)) {
+        if(taskRepository.existsByUserId(userId) &&
+                userId.equals(UserSingleton.getInstance().getId())){
             taskRepository.deleteByUserId(userId);
         }
     }
