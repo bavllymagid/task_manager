@@ -1,6 +1,7 @@
 package com.tasks.task_management.security;
 
 import com.tasks.task_management.local.StaticObjects.RolesConst;
+import com.tasks.task_management.security.authenticationProvider.TaskAccessDeniedHandler;
 import com.tasks.task_management.security.authenticationProvider.TaskAuthEntryPoint;
 import com.tasks.task_management.security.authenticationProvider.TaskAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,33 +22,39 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     TaskAuthEntryPoint taskAuthEntryPoint;
+    TaskAccessDeniedHandler accessDeniedHandler;
 
     @Autowired
-    public SecurityConfig(TaskAuthEntryPoint taskAuthEntryPoint) {
+    public SecurityConfig(TaskAuthEntryPoint taskAuthEntryPoint,
+                          TaskAccessDeniedHandler accessDeniedHandler) {
         this.taskAuthEntryPoint = taskAuthEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authConfig) throws Exception {
-        AuthenticationManager authManager = authConfig.getAuthenticationManager();
-
         http.csrf().disable()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(HttpMethod.POST, "/api/task/receive_instance").permitAll()
-                                .requestMatchers(HttpMethod.DELETE,"/api/task/delete/**").hasRole(RolesConst.USER.name())
-                                .requestMatchers(HttpMethod.PUT,"/api/task/update").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.GET, "/api/task/Invalidate").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.DELETE, "/api/task/delete_user/**").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.DELETE,"/api/task/delete/**").hasRole(RolesConst.ADMIN.name())
+                                .requestMatchers(HttpMethod.PUT,"/api/task/update").hasRole(RolesConst.ADMIN.name())
                                 .requestMatchers(HttpMethod.POST,"/api/task/create").hasRole(RolesConst.USER.name())
                                 .requestMatchers(HttpMethod.GET,"/api/task/get/user_tasks/**").hasRole(RolesConst.USER.name())
                                 .requestMatchers(HttpMethod.GET,"/api/task/get/**").hasRole(RolesConst.USER.name())
-                                .requestMatchers(HttpMethod.POST,"/api/task/assign/**").hasRole(RolesConst.USER.name())
+                                .requestMatchers(HttpMethod.POST,"/api/task/assign/**").hasRole(RolesConst.ADMIN.name())
                                 .requestMatchers(HttpMethod.GET,"/api/task/get/user_assigned_tasks/**").hasRole(RolesConst.USER.name())
-                                .requestMatchers("/api/task/unassign/**").hasRole(RolesConst.USER.name())
+                                .requestMatchers("/api/task/unassign/**").hasRole(RolesConst.ADMIN.name())
                                 .requestMatchers("/api/task/notification/**").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(taskAuthEntryPoint))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(taskAuthEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .addFilterBefore(new TaskAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.httpBasic(Customizer.withDefaults());
         return http.build();

@@ -2,6 +2,7 @@ package com.tasks.task_management.remote.controller;
 
 import com.tasks.task_management.local.exceptions.InvalidTokenException;
 import com.tasks.task_management.local.exceptions.PassedDueDateException;
+import com.tasks.task_management.local.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.remote.dto.TaskDto;
 import com.tasks.task_management.remote.services.AssignTaskService;
@@ -42,7 +43,7 @@ public class TaskController {
 
     @DeleteMapping("/delete/{taskId}")
     public ResponseEntity<String> deleteTask(@RequestHeader("Authorization") String token,
-                                             @PathVariable BigInteger taskId) {
+                                             @PathVariable BigInteger taskId) throws TaskNotFoundException {
         taskService.deleteTask(taskId);
         return ResponseEntity.ok("Task deleted");
     }
