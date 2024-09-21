@@ -40,11 +40,15 @@ public class AssignTaskServiceImpl implements AssignTaskService {
         Task task = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found"));
         for (BigInteger userId : userIds) {
             if(!assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)) {
-                TaskAssignment taskAssignment = new TaskAssignment();
-                taskAssignment.setTask(task);
-                taskAssignment.setUserId(userId);
-                taskAssignment.setAssignedBy(UserSingleton.getInstance().getId());
-                taskAssignments.add(taskAssignment);
+                if(task.getUserId().equals(UserSingleton.getInstance().getId())){
+                    TaskAssignment taskAssignment = new TaskAssignment();
+                    taskAssignment.setTask(task);
+                    taskAssignment.setUserId(userId);
+                    taskAssignment.setAssignedBy(UserSingleton.getInstance().getId());
+                    taskAssignments.add(taskAssignment);
+                }
+                else
+                    throw new TaskNotFoundException("Task not found or already assigned");
             }
             else
                 throw new TaskNotFoundException("Task not found or already assigned");
@@ -57,8 +61,11 @@ public class AssignTaskServiceImpl implements AssignTaskService {
     @Override
     public void unassignTaskFromAll(List<BigInteger> userIds, BigInteger taskId) throws TaskNotFoundException {
         for (BigInteger userId : userIds) {
-            if(assignmentRepository.existsByTask_TaskIdAndUserId(taskId, userId)){
-                assignmentRepository.deleteByTask_TaskIdAndUserId(taskId, userId);
+            if(assignmentRepository.existsByTask_TaskIdAndUserIdAndAssignedBy(taskId,
+                    userId, UserSingleton.getInstance().getId())) {
+                assignmentRepository.deleteAllByTask_TaskIdAndUserIdAndAssignedBy(taskId,
+                        userId,
+                        UserSingleton.getInstance().getId());
                 addNotification("Task unassigned from you", NotificationType.UNASSIGNED.name(), List.of(userId), taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found")));
             }
             else
@@ -70,7 +77,7 @@ public class AssignTaskServiceImpl implements AssignTaskService {
     public void unassignAllTasks(BigInteger userId) throws TaskNotFoundException {
         if(!assignmentRepository.existsByUserId(userId))
             throw new TaskNotFoundException("Task not found");
-        assignmentRepository.deleteByUserId(userId);
+        assignmentRepository.deleteByUserIdAndAssignedBy(userId, UserSingleton.getInstance().getId());
 
         List<Task> tasks = assignmentRepository.getAllByUserId(userId);
         addNotification("Task unassigned from you", NotificationType.UNASSIGNED.name(), List.of(userId), tasks.toArray(new Task[0]));
