@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomAuthenticationFilter extends OncePerRequestFilter {
+public class TaskAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -32,13 +32,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (InvalidTokenException ex) {
-                // Log or handle token validation errors
-                System.out.println("Invalid token exception: " + ex.getMessage());
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+                request.setAttribute("exception status", HttpServletResponse.SC_UNAUTHORIZED);
+                request.setAttribute("exception message", "Invalid token");
             }catch (Exception ex) {
-                // Log or handle generic exceptions
-                System.out.println("Exception in filter: " + ex.getMessage());
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
+                request.setAttribute("exception status", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                request.setAttribute("exception message", "Server error");
             }
         }
         filterChain.doFilter(request, response);

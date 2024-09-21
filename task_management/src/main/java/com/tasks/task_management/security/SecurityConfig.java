@@ -1,8 +1,9 @@
 package com.tasks.task_management.security;
 
 import com.tasks.task_management.local.StaticObjects.RolesConst;
-import com.tasks.task_management.security.authenticationProvider.CustomAuthEntryPoint;
-import com.tasks.task_management.security.authenticationProvider.CustomAuthenticationFilter;
+import com.tasks.task_management.security.authenticationProvider.TaskAuthEntryPoint;
+import com.tasks.task_management.security.authenticationProvider.TaskAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableScheduling
 public class SecurityConfig {
+
+    TaskAuthEntryPoint taskAuthEntryPoint;
+
+    @Autowired
+    public SecurityConfig(TaskAuthEntryPoint taskAuthEntryPoint) {
+        this.taskAuthEntryPoint = taskAuthEntryPoint;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authConfig) throws Exception {
         AuthenticationManager authManager = authConfig.getAuthenticationManager();
@@ -38,7 +47,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/task/notification/**").hasRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(taskAuthEntryPoint))
+                .addFilterBefore(new TaskAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.httpBasic(Customizer.withDefaults());
         return http.build();
     }
