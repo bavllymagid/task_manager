@@ -32,4 +32,8 @@ public class UserSingleton {
         instance.setUsername(userInstance.username());
         instance.setRoles(userInstance.roles());
     }
+
+    public static synchronized void invalidateInstance() {
+        instance = null;
+    }
 }

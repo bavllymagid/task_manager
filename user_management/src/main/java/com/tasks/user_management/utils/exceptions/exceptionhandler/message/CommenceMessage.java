@@ -1,4 +1,4 @@
-package com.tasks.user_management.utils.payload;
+package com.tasks.user_management.utils.exceptions.exceptionhandler.message;
 
 import lombok.Data;
 

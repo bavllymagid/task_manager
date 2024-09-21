@@ -21,4 +21,10 @@ public interface NotificationRepository extends JpaRepository<Notification, BigI
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.createdAt < ?1")
     void deleteByCreatedAtBefore(LocalDateTime time);
+
+    @Transactional
+    @Modifying
+    void deleteAllByUserId(BigInteger userId);
+
+    boolean existsByUserId(BigInteger userId);
 }

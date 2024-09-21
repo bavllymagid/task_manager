@@ -1,6 +1,6 @@
 package com.tasks.user_management.utils.exceptions.exceptionhandler;
 
-import com.tasks.user_management.utils.payload.CommenceMessage;
+import com.tasks.user_management.utils.exceptions.exceptionhandler.message.CommenceMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

@@ -6,8 +6,10 @@ import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.local.repositories.UserRolesRepository;
+import com.tasks.user_management.remote.requests.InvalidateUser;
 import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
+import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.jwt.JwtUtil;
@@ -77,7 +79,13 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public void deleteUser(String email, String token) throws UserNotFoundException {
-        userRepository.deleteByEmail(email);
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found.");
+        }
+        if(InvalidateUser.deleteUser(token, user.get().getId()))
+            userRepository.deleteByEmail(email);
+        else throw new UserNotFoundException("User with email " + email + " not found.");
     }
 
     @Override
@@ -113,11 +121,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void logoutUser(String token){
-        token = token.substring(7);
-        String email = JWT.decode(token).getSubject();
-        userRepository.updateSecretTokenByEmail(email, "");
-        refreshTokenRepository.deleteByUserEmail(email);
+    public void logoutUser(String token) throws TokenValidationException {
+        if(InvalidateUser.invalidateUser(token)) {
+            token = token.substring(7);
+            String email = JWT.decode(token).getSubject();
+            userRepository.updateSecretTokenByEmail(email, "");
+            refreshTokenRepository.deleteByUserEmail(email);
+        }
+        else throw new TokenValidationException("Invalid token.");
     }
 
     @Override

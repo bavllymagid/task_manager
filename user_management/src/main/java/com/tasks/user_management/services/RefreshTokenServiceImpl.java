@@ -93,6 +93,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
 
     @Override
     public User getUserFromToken(String token) throws UserNotFoundException {
+        token = token.replace("Bearer ", "");
         Optional<User> user = userRepository.findByEmail(JWT.decode(token).getSubject());
         if(user.isEmpty()) throw new UserNotFoundException("User Not Found");
         return user.get();

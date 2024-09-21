@@ -13,6 +13,7 @@ public interface TaskService {
     void updateTask(TaskDto task) throws TaskNotFoundException;
     void updateTaskStatus(BigInteger taskId, String status) throws TaskNotFoundException;
     void deleteTask(BigInteger taskId) throws TaskNotFoundException;
+    void deleteAllTasks(BigInteger userId) throws TaskNotFoundException;
     Task getTask(BigInteger taskId) throws TaskNotFoundException;
     Page<Task> getUserCreatedTasks(BigInteger id, int page, int size);
 }

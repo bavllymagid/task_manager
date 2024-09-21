@@ -44,7 +44,7 @@ CREATE TABLE user_groups (
     group_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     PRIMARY KEY (user_id, group_id),
-    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES `groups`(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE roles (
 	id BIGINT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(50) NOT NULL UNIQUE
 );
--- insert roles in the begining-- 
+-- insert roles in the beginning--
 insert into roles values(1, "USER");
 insert into roles values(2, "ADMIN");
 insert into roles values(3, "MANAGER");

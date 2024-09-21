@@ -107,6 +107,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public void deleteAllTasks(BigInteger userId){
+        if(taskRepository.existsByUserId(userId)) {
+            taskRepository.deleteByUserId(userId);
+        }
+    }
+
+    @Override
     public Task getTask(BigInteger taskId) throws TaskNotFoundException {
         return taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task not found"));
     }

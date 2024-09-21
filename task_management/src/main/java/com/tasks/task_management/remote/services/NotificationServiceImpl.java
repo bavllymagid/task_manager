@@ -86,4 +86,10 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setRead(true);
         return notificationRepository.save(notification);
     }
+
+    @Override
+    public void deleteAllNotificationsByUserId(BigInteger userId) {
+        if(notificationRepository.existsByUserId(userId))
+            notificationRepository.deleteAllByUserId(userId);
+    }
 }

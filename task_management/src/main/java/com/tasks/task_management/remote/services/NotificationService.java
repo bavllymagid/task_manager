@@ -12,4 +12,5 @@ public interface NotificationService {
     void generateOnActivityNotification(List<Notification> notifications);
     void deleteNotificationsEveryNDays();
     Notification updateNotificationStatus(BigInteger notificationId);
+    void deleteAllNotificationsByUserId(BigInteger userId);
 }
