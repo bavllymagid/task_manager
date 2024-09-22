@@ -8,7 +8,7 @@ import com.tasks.user_management.utils.payload.SendUserDto;
 
 public interface RefreshTokenService {
     String refreshAccessToken(String refreshToken) throws TokenValidationException;
-    SendUserDto validateToken(String token) throws TokenValidationException;
+    SendUserDto getUserByToken(String token) throws UserNotFoundException;
     RefreshToken createRefreshToken(User user);
     User getUserFromToken(String token) throws UserNotFoundException;
 }

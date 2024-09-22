@@ -3,6 +3,7 @@ package com.tasks.user_management.remote.controllers;
 import com.tasks.user_management.remote.requests.SendUserInstance;
 import com.tasks.user_management.services.RefreshTokenService;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
+import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.payload.SendUserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,8 @@ public class TokenController {
     }
 
     @GetMapping("/api/token/validate")
-    public ResponseEntity<SendUserDto> validateToken(@RequestHeader("Authorization") String token) throws TokenValidationException, IOException, InterruptedException {
-        SendUserDto user = refreshTokenService.validateToken(token);
+    public ResponseEntity<SendUserDto> validateToken(@RequestHeader("Authorization") String token) throws UserNotFoundException, IOException, InterruptedException {
+        SendUserDto user = refreshTokenService.getUserByToken(token);
         try {
             SendUserInstance.sendInstance(new SendUserDto(user.getId(), user.getUsername(), user.getEmail(), user.getRoles()));
         } catch (Exception e) {

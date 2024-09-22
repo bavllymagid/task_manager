@@ -66,15 +66,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
     }
 
     @Override
-    public SendUserDto validateToken(String token) throws TokenValidationException {
+    public SendUserDto getUserByToken(String token) throws UserNotFoundException {
         token = token.replace("Bearer ", "");
         String email = JWT.decode(token).getSubject();
-        if (jwtUtil.validateToken(token, userRepository.findSecretTokenByEmail(email)) != null) {
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new TokenValidationException("Invalid token"));
+        if (userRepository.existsByEmail(email)) {
+            User user = userRepository.findByEmail(email).get();
             List<String> roles = user.getUserRoles().stream().map(UserRole::getName).toList();
             return new SendUserDto(user.getId(), user.getUsername(), user.getEmail(), roles);
         } else {
-            throw new TokenValidationException("Invalid token");
+            throw new UserNotFoundException("Invalid token");
         }
     }
 

@@ -1,6 +1,7 @@
 package com.tasks.user_management.security;
 
 import com.tasks.user_management.security.config.JwtAuthenticationFilter;
+import com.tasks.user_management.security.config.UserAccessDeniedHandler;
 import com.tasks.user_management.security.config.UserEntryPoint;
 import com.tasks.user_management.utils.RolesConst;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,15 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserEntryPoint userEntryPoint;
+    private final UserAccessDeniedHandler userAccessDeniedHandler;
 
     @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          UserEntryPoint userEntryPoint) {
+                          UserEntryPoint userEntryPoint,
+                          UserAccessDeniedHandler userAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userEntryPoint = userEntryPoint;
+        this.userAccessDeniedHandler = userAccessDeniedHandler;
     }
 
     @Bean
@@ -44,7 +48,11 @@ public class SecurityConfig {
                                 .requestMatchers("/api/users/**").hasAnyRole(RolesConst.USER.name())
                                 .anyRequest().authenticated()
                 )
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(userEntryPoint))
+                .exceptionHandling(
+                        exception -> exception
+                                .authenticationEntryPoint(userEntryPoint)
+                                .accessDeniedHandler(userAccessDeniedHandler)
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
 
