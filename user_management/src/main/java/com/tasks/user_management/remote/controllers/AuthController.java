@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,8 +68,10 @@ public class AuthController {
     }
 
     @GetMapping("/get_users")
-    public ResponseEntity<List<UserDto>> getUsers(@RequestHeader("Authorization") String token) throws TokenValidationException {
-        return ResponseEntity.ok(userService.getListOfUsers(token));
+    public ResponseEntity<Page<UserDto>> getUsers(@RequestHeader("Authorization") String token,
+                                                  @RequestParam int size,
+                                                  @RequestParam int page ) throws TokenValidationException {
+        return ResponseEntity.ok(userService.getListOfUsers(token, size, page));
     }
 
     @GetMapping("/get_user")

@@ -3,6 +3,8 @@ package com.tasks.user_management.local.repositories;
 import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +25,7 @@ public interface UserRepository extends JpaRepository<User, BigInteger>{
     void updateSecretTokenByEmail(String email, String secretToken);
     @Transactional
     void deleteByEmail(String email) throws UserNotFoundException;
+
+    @Query("select u from User u where lower(u.email) != lower(?1)")
+    Page<User> findAllExceptCurrentUser(String email, Pageable pageable);
 }

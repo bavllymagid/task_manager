@@ -18,6 +18,8 @@ import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -102,13 +104,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserDto> getListOfUsers(String token){
-        List<User> users = userRepository.findAll();
-        List<UserDto> usersDto = new ArrayList<>();
-        for (User user : users){
-            usersDto.add(new UserDto(user.getId(), user.getUsername(), user.getEmail(), ""));
-        }
-        return usersDto;
+    public Page<UserDto> getListOfUsers(String token, int size, int page){
+        Pageable pageable = Pageable.ofSize(size).withPage(page);
+        Page<User> users = userRepository.findAllExceptCurrentUser(JWT.decode(token.substring(7)).getSubject(), pageable);
+        return users.map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail(), ""));
     }
 
     @Override
