@@ -149,6 +149,9 @@ spring.datasource.password=(your_password)
 - **Endpoint**: `GET /api/users/get_users`
 - **Authentication**: Bearer Token
 - **Description**: Retrieves all users.
+- **Query Parameters**:
+    - `page`: Page number (default: 0)
+    - `size`: Page size (default: 20)
 
 ### 1.2 Token Management
 
