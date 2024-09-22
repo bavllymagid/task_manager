@@ -141,14 +141,29 @@ spring.datasource.password=(your_password)
 - **Endpoint**: `DELETE /api/users/delete`
 - **Description**: Deletes a user.
 - **Authentication**: Bearer Token
-- **Request**:
-    - **Query Parameter**: `email=exampleEmail@example.com`
+- **Query Parameters**:
+    - `email`: User Email
 
 #### Get All Users
 
 - **Endpoint**: `GET /api/users/get_users`
 - **Authentication**: Bearer Token
 - **Description**: Retrieves all users.
+- **Query Parameters**:
+    - `page`: Page number (default: 0)
+    - `size`: Page size (default: 20)
+
+#### Get User
+- **Endpoint**: `GET /api/users/get_user`
+- **Authentication**: Bearer Token
+- **Description**: Retrieves a user by Email.
+- **Query Parameters**:
+    - `email`: User Email
+
+#### logout User
+- **Endpoint**: `GET /api/users/logout`
+- **Authentication**: Bearer Token
+- **Description**: Logs out a user.
 
 ### 1.2 Token Management
 
@@ -171,10 +186,10 @@ spring.datasource.password=(your_password)
 ### 2.1 Task Management
 #### Create Task
 
-- Endpoint: **POST /api/task/create**
-- Authentication: Bearer Token
-- Description: Creates a new task.
-- Request Body:
+- **Endpoint**: `POST /api/task/create`
+- **Authentication**: Bearer Token
+- **Description**: Creates a new task.
+- **Request Body**:
 ```json
 
 {
@@ -186,23 +201,23 @@ spring.datasource.password=(your_password)
 ```
 #### Get User Created Tasks
 
-- Endpoint: **GET /api/task/get/user_tasks/{userId}**
-- Authentication: Bearer Token
-- Query Parameters:
-  - page: Page number (default: 0)
-  - size: Page size (default: 20)
-- Description: Retrieves tasks created by a specific user.
+- **Endpoint**: `GET /api/task/get/user_tasks/{userId}`
+- **Authentication**: Bearer Token
+- **Description**: Retrieves tasks created by a specific user.
+- **Query Parameters**:
+    - `page`: Page number (default: 0)
+    - `size`: Page size (default: 20)
 
 #### Get Task By ID
-- Endpoint: **GET /api/task/get/{taskId}**
-- Authentication: Bearer Token
-- Description: Retrieves a task by ID.
+- **Endpoint**: `GET /api/task/get/{taskId}`
+- **Authentication**: Bearer Token
+- **Description**: Retrieves a task by ID.
 
 #### Update Task
-- Endpoint: **PUT /api/task/update**
-- Authentication: Bearer Token
-- Description: Updates task details.
-- Request Body:
+- **Endpoint**: `PUT /api/task/update`
+- **Authentication**: Bearer Token
+- **Description**: Updates task details.
+- **Request Body**:
 ```json
 {
   "taskId": 1,
@@ -214,60 +229,60 @@ spring.datasource.password=(your_password)
 ```
 
 #### Delete Task
-- Endpoint: **DELETE /api/task/delete/{taskId}**
-- Authentication: Bearer Token
-- Description: Deletes a task.
+- **Endpoint**: `DELETE /api/task/delete/{taskId}`
+- **Authentication**: Bearer Token
+- **Description**: Deletes a task.
 
 ### 2.2 Task Assignment
 
 #### Assign Task to User
-- Endpoint: **POST /api/task/assign/{taskId}**
-- Authentication: Bearer Token
-- Description: Assigns a task to a user.
-- Request Body:
+- **Endpoint**: `POST /api/task/assign/{taskId}`
+- **Authentication**: Bearer Token
+- **Description**: Assigns a task to a user.
+- **Request Body**:
 ```json
 [1, 2, 3]
 ```
 
 #### Get User Assigned Tasks
-- Endpoint: **GET /api/task/get/user_assigned_tasks/{userId}**
-- Authentication: Bearer Token
-- Query Parameters:
-  - page: Page number (default: 0)
-  - size: Page size (default: 20)
-- Description: Retrieves tasks assigned to a specific user.
+- **Endpoint**: `GET /api/task/get/user_assigned_tasks/{userId}`
+- **Authentication**: Bearer Token
+- **Description**: Retrieves tasks assigned to a specific user.
+- **Query Parameters**:
+  - `page`: Page number (default: 0)
+  - `size`: Page size (default: 20)
 
 #### Unassign Task
-- Endpoint: **DELETE /api/task/unassign/{taskId}**
-- Authentication: Bearer Token
-- Description: Unassigns a task from a user.
-- Request Body:
+- **Endpoint**: `DELETE /api/task/unassign/{taskId}`
+- **Authentication**: Bearer Token
+- **Description**: Unassigns a task from a user.
+- **Request Body**:
 ```json
 [1, 2, 3]
 ```
 
 
 #### Unassign All Tasks from User
-- Endpoint: **DELETE /api/task/unassign/all/task/{userId}**
-- Description: Unassigns all tasks from a user.
-- Authentication: Bearer Token
+- **Endpoint**: `DELETE /api/task/unassign/all/task/{userId}`
+- **Description**: Unassigns all tasks from a user.
+- **Authentication**: Bearer Token
 
 ### 2.3 Notification Management
 
 #### Get User Notifications
-- Endpoint: **GET /api/task/notification/send**
-- Authentication: Bearer Token
-- Description: Sends notifications to user.
-- Query Parameters:
-  - size: Page size (default: 20)
-  - page: Page number (default: 0)
+- **Endpoint**: `GET /api/task/notification/send`
+- **Authentication**: Bearer Token
+- **Description**: Sends notifications to user.
+- **Query Parameters**:
+  - `size`: Page size (default: 20)
+  - `page`: Page number (default: 0)
 
 #### Update Read Status
-- Endpoint: **PUT /api/task/notification/update_status**
-- Authentication: Bearer Token
-- Description: Updates notification read status.
-- Query Parameters:
-  - notificationId: Notification ID
+- **Endpoint**: `PUT /api/task/notification/update_status`
+- **Authentication**: Bearer Token
+- **Description**: Updates notification read status.
+- **Query Parameters**:
+  - `notificationId`: Notification ID
 --- 
 
 ## Contributing
