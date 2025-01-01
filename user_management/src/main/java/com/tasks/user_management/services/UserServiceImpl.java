@@ -1,6 +1,7 @@
 package com.tasks.user_management.services;
 
 import com.auth0.jwt.JWT;
+import com.tasks.user_management.kafka.TopicsNames;
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
@@ -17,9 +18,12 @@ import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -28,12 +32,14 @@ import java.util.*;
 @Service
 public class UserServiceImpl implements UserService{
 
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     UserRepository userRepository;
     RefreshTokenRepository refreshTokenRepository;
     PasswordEncoder passwordEncoder;
     JwtUtil jwtUtil;
     RefreshTokenService refreshTokenService;
     UserRolesRepository userRolesRepository;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
@@ -41,16 +47,19 @@ public class UserServiceImpl implements UserService{
                            RefreshTokenRepository refreshTokenRepository,
                            RefreshTokenService refreshTokenService,
                            UserRolesRepository userRolesRepository,
-                           JwtUtil jwtUtil) {
+                           JwtUtil jwtUtil,
+                           KafkaTemplate<String, Object> kafkaTemplate) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenRepository = refreshTokenRepository;
         this.refreshTokenService = refreshTokenService;
         this.userRolesRepository = userRolesRepository;
         this.jwtUtil = jwtUtil;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
+    @Transactional
     public void createUser(UserDto user) throws UserAlreadyExistsException {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists.");
@@ -64,6 +73,10 @@ public class UserServiceImpl implements UserService{
         newUser.setSecretToken("");
         newUser.setUserRoles(new ArrayList<>(List.of(userRolesRepository.findByName(RolesConst.USER.name()))));
         userRepository.save(newUser);
+        userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
+            kafkaTemplate.send(TopicsNames.USER_CREATED.getTopicName(), new UserDto(u.getId(), u.getUsername(), u.getEmail(), u.getPassword()));
+        });
+        log.info("User with email {} created successfully.", user.getEmail());
     }
 
     @Override
@@ -75,6 +88,7 @@ public class UserServiceImpl implements UserService{
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
         userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
         String token = jwtUtil.generateToken(user.get(), new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
+        kafkaTemplate.send(TopicsNames.USER_AUTHENTICATED.getTopicName(), new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), user.get().getPassword()));
         return new LoginDto(token, refreshToken.getRefreshToken(), user.get());
     }
 
@@ -88,6 +102,7 @@ public class UserServiceImpl implements UserService{
         if(InvalidateUser.deleteUser(token, user.get().getId()))
             userRepository.deleteByEmail(email);
         else throw new UserNotFoundException("User with email " + email + " not found.");
+        kafkaTemplate.send(TopicsNames.USER_DELETED.getTopicName(), new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), user.get().getPassword()));
     }
 
     @Override
@@ -100,6 +115,7 @@ public class UserServiceImpl implements UserService{
         user.get().setUsername(userDto.getUsername());
         user.get().setPassword(passwordEncoder.encode(userDto.getPassword()));
         userRepository.save(user.get());
+        kafkaTemplate.send(TopicsNames.USER_UPDATED.getTopicName(), new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), user.get().getPassword()));
         return userDto;
     }
 
@@ -126,6 +142,7 @@ public class UserServiceImpl implements UserService{
             String email = JWT.decode(token).getSubject();
             userRepository.updateSecretTokenByEmail(email, "");
             refreshTokenRepository.deleteByUserEmail(email);
+            kafkaTemplate.send(TopicsNames.USER_LOGGED_OUT.getTopicName(),null);
         }
         else throw new TokenValidationException("Invalid token.");
     }
@@ -142,6 +159,8 @@ public class UserServiceImpl implements UserService{
             user.get().getUserRoles().add(userRolesRepository.findByName(getRole(role)));
         }
         userRepository.save(user.get());
+        kafkaTemplate.send(TopicsNames.USER_ROLE_UPDATED.getTopicName()
+                , new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), ""));
         return new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), "");
     }
 
