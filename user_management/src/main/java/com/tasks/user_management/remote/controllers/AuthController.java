@@ -43,12 +43,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginDto> authenticateUser(@RequestBody UserDto user) throws AuthenticationFailedException{
         LoginDto loginDto = userService.authenticateUser(user.getEmail(), user.getPassword());
-        List<String> roles = loginDto.getUser().getUserRoles().stream().map(UserRole::getName).toList();
-        try {
-            SendUserInstance.sendInstance(new SendUserDto(loginDto.getUser().getId(), loginDto.getUser().getUsername(), loginDto.getUser().getEmail(), roles));
-        } catch (Exception e) {
-            log.error("Error sending user instance: {}", e.getMessage());
-        }
         return ResponseEntity.ok(loginDto);
     }
 

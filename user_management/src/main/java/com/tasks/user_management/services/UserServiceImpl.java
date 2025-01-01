@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.tasks.user_management.kafka.TopicsNames;
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
+import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.local.repositories.UserRolesRepository;
@@ -15,6 +16,7 @@ import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.LoginDto;
+import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -88,7 +90,8 @@ public class UserServiceImpl implements UserService{
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
         userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
         String token = jwtUtil.generateToken(user.get(), new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
-        kafkaTemplate.send(TopicsNames.USER_AUTHENTICATED.getTopicName(), new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), user.get().getPassword()));
+        kafkaTemplate.send(TopicsNames.USER_AUTHENTICATED.getTopicName(), new SendUserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(),
+                user.get().getUserRoles().stream().map(UserRole::getName).toList()));
         return new LoginDto(token, refreshToken.getRefreshToken(), user.get());
     }
 
