@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -83,7 +84,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         refreshToken.setUser(user);
         refreshToken.setSecretRefresh(RandomStringUtils.randomAlphanumeric(12));
         refreshToken.setRefreshToken(jwtUtil.generateToken(user,
-                new Date(System.currentTimeMillis() + 2592000000L),
+                new Date(System.currentTimeMillis() + Duration.ofDays(30).toMillis()),
                 refreshToken.getSecretRefresh()));
         refreshToken.setCreatedAt(LocalDateTime.now());
         refreshToken.setExpiresAt(LocalDateTime.now().plusDays(30));
