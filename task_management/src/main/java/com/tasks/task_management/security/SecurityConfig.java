@@ -1,5 +1,6 @@
 package com.tasks.task_management.security;
 
+import com.tasks.task_management.kafka.utils.PendingRequestManager;
 import com.tasks.task_management.local.StaticObjects.RolesConst;
 import com.tasks.task_management.security.authenticationProvider.TaskAccessDeniedHandler;
 import com.tasks.task_management.security.authenticationProvider.TaskAuthEntryPoint;
@@ -8,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,12 +24,18 @@ public class SecurityConfig {
 
     TaskAuthEntryPoint taskAuthEntryPoint;
     TaskAccessDeniedHandler accessDeniedHandler;
+    KafkaTemplate<String, Object> kafkaTemplate;
+    PendingRequestManager pendingRequestManager;
 
     @Autowired
     public SecurityConfig(TaskAuthEntryPoint taskAuthEntryPoint,
-                          TaskAccessDeniedHandler accessDeniedHandler) {
+                          TaskAccessDeniedHandler accessDeniedHandler,
+                          KafkaTemplate<String, Object> kafkaTemplate,
+                          PendingRequestManager pendingRequestManager) {
         this.taskAuthEntryPoint = taskAuthEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.kafkaTemplate = kafkaTemplate;
+        this.pendingRequestManager = pendingRequestManager;
     }
 
     @Bean
@@ -55,7 +62,9 @@ public class SecurityConfig {
                         .authenticationEntryPoint(taskAuthEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
-                .addFilterBefore(new TaskAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new TaskAuthenticationFilter(kafkaTemplate,
+                        pendingRequestManager),
+                        UsernamePasswordAuthenticationFilter.class);
         http.httpBasic(Customizer.withDefaults());
         return http.build();
     }

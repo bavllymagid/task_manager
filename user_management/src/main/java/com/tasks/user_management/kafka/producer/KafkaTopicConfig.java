@@ -1,4 +1,4 @@
-package com.tasks.user_management.kafka;
+package com.tasks.user_management.kafka.producer;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
