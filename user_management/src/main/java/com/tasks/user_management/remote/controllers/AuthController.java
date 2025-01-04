@@ -6,9 +6,7 @@ import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.payload.LoginDto;
-import com.tasks.user_management.utils.payload.RoleChangeDto;
 import com.tasks.user_management.utils.payload.UserDto;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,11 +72,4 @@ public class AuthController {
         userService.logoutUser(token);
         return ResponseEntity.ok("User logged out successfully.");
     }
-
-    @PutMapping("/add_role")
-    public ResponseEntity<UserDto> addRoleToUser(@RequestHeader("Authorization") String token,
-                                                 @Valid @RequestBody RoleChangeDto role) throws TokenValidationException, UserNotFoundException {
-        return ResponseEntity.ok(userService.addRoleToUser(role.getEmail(), role.getRole(), token));
-    }
-
 }

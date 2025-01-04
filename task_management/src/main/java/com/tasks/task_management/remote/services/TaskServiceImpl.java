@@ -1,6 +1,7 @@
 package com.tasks.task_management.remote.services;
 
 import com.tasks.task_management.local.StaticObjects.NotificationType;
+import com.tasks.task_management.local.StaticObjects.RolesConst;
 import com.tasks.task_management.local.StaticObjects.TaskStatus;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
 import com.tasks.task_management.utils.exceptions.InvalidTokenException;
@@ -16,11 +17,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -29,14 +32,17 @@ public class TaskServiceImpl implements TaskService {
     TaskRepository taskRepository;
     TaskAssRepository assignmentRepository;
     NotificationService notificationService;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Autowired
     public TaskServiceImpl(TaskRepository taskRepository,
                            TaskAssRepository assignmentRepository,
-                           NotificationService notificationService) {
+                           NotificationService notificationService,
+                           KafkaTemplate<String, Object> kafkaTemplate) {
         this.taskRepository = taskRepository;
         this.assignmentRepository = assignmentRepository;
         this.notificationService = notificationService;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -54,14 +60,18 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.save(newTask);
         task.setCreatedAt(LocalDateTime.now());
         task.setUserId(newTask.getUserId());
+        kafkaTemplate.send("changeRole", new HashMap<>() {{
+            put("id", task.getUserId());
+            put("role", RolesConst.ADMIN.name());
+        }});
         return task;
     }
 
     @Override
     public void updateTask(TaskDto task) throws TaskNotFoundException {
-        if(taskRepository.existsById(task.getTaskId())) {
+        if (taskRepository.existsById(task.getTaskId())) {
             Task updatedTask = taskRepository.findById(task.getTaskId()).get();
-            if(!updatedTask.getUserId().equals(UserSingleton.getInstance().getId())) {
+            if (!updatedTask.getUserId().equals(UserSingleton.getInstance().getId())) {
                 throw new TaskNotFoundException("Task not found");
             }
             updatedTask.setTitle(task.getTitle());
@@ -87,9 +97,9 @@ public class TaskServiceImpl implements TaskService {
             default:
                 throw new IllegalArgumentException("Invalid status");
         }
-        if(taskRepository.existsById(taskId)) {
+        if (taskRepository.existsById(taskId)) {
             Task task = taskRepository.findById(taskId).get();
-            if(!task.getUserId().equals(UserSingleton.getInstance().getId())) {
+            if (!task.getUserId().equals(UserSingleton.getInstance().getId())) {
                 throw new TaskNotFoundException("Task not found");
             }
             taskRepository.updateStatusByTaskId(status, taskId);
@@ -102,20 +112,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteTask(BigInteger taskId, String token) throws TaskNotFoundException {
-        if(taskRepository.existsById(taskId)) {
+        if (taskRepository.existsById(taskId)) {
             Task task = taskRepository.findById(taskId).get();
-            if(task.getUserId().equals(UserSingleton.getInstance().getId())) {
+            if (task.getUserId().equals(UserSingleton.getInstance().getId())) {
                 addNotification(task, "Task: " + task.getTitle() + " unassigned from you",
                         NotificationType.UNASSIGNED.name());
                 taskRepository.deleteById(taskId);
-                
-//                if(!taskRepository.existsByUserId(task.getUserId())){
-//                    if(!Requests.changeRole(token, UserSingleton.getInstance().getEmail(), "USER")) {
-//                        throw new InvalidTokenException("Invalid token");
-//                    }
-//                }
-            }
-            else {
+
+                if (!taskRepository.existsByUserId(task.getUserId())) {
+                    kafkaTemplate.send("changeRole", new HashMap<>() {{
+                        put("id", task.getUserId());
+                        put("role", RolesConst.USER.name());
+                    }});
+                }
+            } else {
                 throw new TaskNotFoundException("Task not found");
             }
         } else {
@@ -124,9 +134,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void deleteAllTasks(BigInteger userId){
-        if(taskRepository.existsByUserId(userId) &&
-                userId.equals(UserSingleton.getInstance().getId())){
+    public void deleteAllTasks(BigInteger userId) {
+        if (taskRepository.existsByUserId(userId) &&
+                userId.equals(UserSingleton.getInstance().getId())) {
             taskRepository.deleteByUserId(userId);
         }
     }

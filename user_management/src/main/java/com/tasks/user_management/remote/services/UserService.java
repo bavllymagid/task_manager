@@ -8,6 +8,8 @@ import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import org.springframework.data.domain.Page;
 
+import java.math.BigInteger;
+
 public interface UserService {
     void createUser(UserDto user) throws UserAlreadyExistsException;
     LoginDto authenticateUser(String email, String password) throws AuthenticationFailedException;
@@ -16,5 +18,5 @@ public interface UserService {
     Page<UserDto> getListOfUsers(String token, int size, int page) throws TokenValidationException;
     UserDto getUser(String email, String token) throws TokenValidationException, UserNotFoundException;
     void logoutUser(String token) throws TokenValidationException;
-    UserDto addRoleToUser(String email, String role, String token) throws TokenValidationException, UserNotFoundException;
+    void addRoleToUser(BigInteger id, String role) throws UserNotFoundException;
 }

@@ -26,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -145,20 +147,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto addRoleToUser(String email, String role, String token) throws UserNotFoundException {
-        Optional<User> user = userRepository.findByEmail(email);
+    public void addRoleToUser(BigInteger id, String role) throws UserNotFoundException {
+        Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User with email " + email + " not found.");
+            throw new UserNotFoundException("User with id: " + id + " not found.");
         }
         if (role.equalsIgnoreCase("user")) {
             user.get().setUserRoles(new ArrayList<>(List.of(userRolesRepository.findByName(getRole(role)))));
-        } else {
+        } else{
             user.get().getUserRoles().add(userRolesRepository.findByName(getRole(role)));
         }
         userRepository.save(user.get());
-        kafkaTemplate.send(TopicsNames.USER_ROLE_UPDATED.getTopicName()
-                , new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), ""));
-        return new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), "");
     }
 
     private String getRole(String role) {
