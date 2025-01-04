@@ -42,7 +42,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/admin/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
                                 .requestMatchers("/api/token/**").hasAnyRole(RolesConst.USER.name())
                                 .requestMatchers("/api/users/**").hasAnyRole(RolesConst.USER.name())
