@@ -140,14 +140,11 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void logoutUser(String token) throws TokenValidationException {
-        if(InvalidateUser.invalidateUser(token)) {
             token = token.substring(7);
             String email = JWT.decode(token).getSubject();
             userRepository.updateSecretTokenByEmail(email, "");
             refreshTokenRepository.deleteByUserEmail(email);
             kafkaTemplate.send(TopicsNames.USER_LOGGED_OUT.getTopicName(),null);
-        }
-        else throw new TokenValidationException("Invalid token.");
     }
 
     @Override

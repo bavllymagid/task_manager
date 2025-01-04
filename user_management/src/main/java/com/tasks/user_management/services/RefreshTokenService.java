@@ -11,4 +11,5 @@ public interface RefreshTokenService {
     SendUserDto getUserByToken(String token) throws UserNotFoundException;
     RefreshToken createRefreshToken(User user);
     User getUserFromToken(String token) throws UserNotFoundException;
+    RefreshToken getRefreshToken(String token) throws TokenValidationException;
 }

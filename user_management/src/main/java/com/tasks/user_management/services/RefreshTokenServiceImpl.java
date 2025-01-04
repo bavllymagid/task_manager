@@ -43,11 +43,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         refreshToken = refreshToken.replace("Bearer ", "");
         RefreshToken token = refreshTokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
-        String vEmail = jwtUtil.validateToken(refreshToken, token.getSecretRefresh());
-        if (vEmail != null) {
-            String newToken = saveAccessToken(vEmail);
+        String email = JWT.decode(refreshToken).getSubject();
+        if (email != null) {
+            String newToken = saveAccessToken(email);
             refreshTokenRepository.save(token);
-            User user = userRepository.findByEmail(vEmail).orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
             return jwtUtil.generateToken(user, new Date(System.currentTimeMillis() + 43200000), newToken);
         } else {
             throw new TokenValidationException("Invalid refresh token");
@@ -98,6 +98,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
         Optional<User> user = userRepository.findByEmail(JWT.decode(token).getSubject());
         if(user.isEmpty()) throw new UserNotFoundException("User Not Found");
         return user.get();
+    }
+
+    @Override
+    public RefreshToken getRefreshToken(String token) throws TokenValidationException {
+        token = token.replace("Bearer ", "");
+        return refreshTokenRepository.findByRefreshToken(token)
+                .orElseThrow(() -> new TokenValidationException("Invalid refresh token"));
     }
 
 }
