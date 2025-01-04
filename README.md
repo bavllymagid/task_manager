@@ -21,6 +21,7 @@ The **Task Manager API** is a microservice-based solution that helps manage user
 - Database: MySQL
 - Authentication: JWT (JSON Web Token)
 - Communication: RESTful APIs
+- Messaging: Kafka
 ---
 ## Getting Started
 #### Prerequisites
@@ -55,8 +56,39 @@ The **Task Manager API** is a microservice-based solution that helps manage user
        ```sql
        source Task_manager_script.sql; 
        ```
-
-##### This will set up the required tables and schema for the Task Manager application.
+- Kafka:
+    1. **Install Kafka**
+        - **For Windows:**
+            - Download the Kafka binaries from the official Apache Kafka website: https://kafka.apache.org/downloads
+            - Extract the downloaded file to a directory.
+            - Navigate to the Kafka directory and start the Zookeeper server:
+          ```bash
+          .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+          ```
+            - Start the Kafka server:
+          ```bash
+          .\bin\windows\kafka-server-start.bat .\config\server.properties
+          ```
+            - Create a topic named **notification**:
+          ```bash
+          .\bin\windows\kafka-topics.bat --create --topic notification --bootstrap-server localhost:9092
+          ```
+        - **For Linux:**
+            - Download the Kafka binaries from the official Apache Kafka website: https://kafka.apache.org/downloads
+            - Extract the downloaded file to a directory.
+            - Navigate to the Kafka directory and start the Zookeeper server:
+          ```bash
+          bin/zookeeper-server-start.sh config/zookeeper.properties
+          ```
+            - Start the Kafka server:
+          ```bash
+          bin/kafka-server-start.sh config/server.properties
+          ```
+            - Create a topic named **example**:
+          ```bash
+          bin/kafka-topics.sh --create --topic example --bootstrap-server localhost:9092
+          ```
+##### This will set up the necessary environment for the Task Manager API.
 
 ---
 ## Installation
