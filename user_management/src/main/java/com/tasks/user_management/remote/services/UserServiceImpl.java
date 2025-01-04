@@ -93,7 +93,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void deleteUser(String email, String token) throws UserNotFoundException {
+    public void deleteUser(String token) throws UserNotFoundException {
+        String email = JWT.decode(token.substring(7)).getSubject();
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found.");

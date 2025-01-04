@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 public interface UserService {
     void createUser(UserDto user) throws UserAlreadyExistsException;
     LoginDto authenticateUser(String email, String password) throws AuthenticationFailedException;
-    void deleteUser(String email, String token) throws TokenValidationException, UserNotFoundException;
+    void deleteUser(String token) throws TokenValidationException, UserNotFoundException;
     UserDto updateUser(UserDto userDto, String token) throws TokenValidationException, UserNotFoundException;
     Page<UserDto> getListOfUsers(String token, int size, int page) throws TokenValidationException;
     UserDto getUser(String email, String token) throws TokenValidationException, UserNotFoundException;
