@@ -1,6 +1,6 @@
 package com.tasks.user_management.remote.controllers;
 
-import com.tasks.user_management.services.RefreshTokenService;
+import com.tasks.user_management.remote.services.RefreshTokenService;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.payload.SendUserDto;

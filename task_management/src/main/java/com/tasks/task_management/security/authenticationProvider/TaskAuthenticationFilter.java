@@ -1,10 +1,10 @@
 package com.tasks.task_management.security.authenticationProvider;
 
-import com.tasks.task_management.kafka.payload.ValidateUserPayload;
-import com.tasks.task_management.kafka.utils.PendingRequestManager;
+import com.tasks.task_management.remote.kafka.payload.ValidateUserPayload;
+import com.tasks.task_management.remote.kafka.utils.PendingRequestManager;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
-import com.tasks.task_management.local.exceptions.InvalidTokenException;
-import com.tasks.task_management.remote.utils.payload.UserInstance;
+import com.tasks.task_management.utils.exceptions.InvalidTokenException;
+import com.tasks.task_management.utils.payload.UserInstance;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 

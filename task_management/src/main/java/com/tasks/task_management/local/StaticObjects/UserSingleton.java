@@ -1,7 +1,7 @@
 package com.tasks.task_management.local.StaticObjects;
 
 
-import com.tasks.task_management.remote.utils.payload.UserInstance;
+import com.tasks.task_management.utils.payload.UserInstance;
 import lombok.Data;
 
 import java.math.BigInteger;

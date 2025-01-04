@@ -2,7 +2,7 @@ package com.tasks.task_management.remote.services;
 
 import com.tasks.task_management.local.StaticObjects.NotificationType;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
-import com.tasks.task_management.local.exceptions.TaskNotFoundException;
+import com.tasks.task_management.utils.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Notification;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.models.TaskAssignment;

@@ -1,6 +1,6 @@
 package com.tasks.user_management.remote.controllers;
 
-import com.tasks.user_management.services.UserService;
+import com.tasks.user_management.remote.services.UserService;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;

@@ -1,6 +1,5 @@
 package com.tasks.task_management.remote.services;
 
-import com.tasks.task_management.local.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Task;
 import org.springframework.data.domain.Page;
 

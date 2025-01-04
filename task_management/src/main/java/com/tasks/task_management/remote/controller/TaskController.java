@@ -1,10 +1,10 @@
 package com.tasks.task_management.remote.controller;
 
-import com.tasks.task_management.local.exceptions.InvalidTokenException;
-import com.tasks.task_management.local.exceptions.PassedDueDateException;
-import com.tasks.task_management.local.exceptions.TaskNotFoundException;
+import com.tasks.task_management.utils.exceptions.InvalidTokenException;
+import com.tasks.task_management.utils.exceptions.PassedDueDateException;
+import com.tasks.task_management.utils.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Task;
-import com.tasks.task_management.remote.dto.TaskDto;
+import com.tasks.task_management.utils.dto.TaskDto;
 import com.tasks.task_management.remote.services.AssignTaskService;
 import com.tasks.task_management.remote.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;

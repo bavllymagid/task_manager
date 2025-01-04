@@ -3,15 +3,14 @@ package com.tasks.task_management.remote.services;
 import com.tasks.task_management.local.StaticObjects.NotificationType;
 import com.tasks.task_management.local.StaticObjects.TaskStatus;
 import com.tasks.task_management.local.StaticObjects.UserSingleton;
-import com.tasks.task_management.local.exceptions.InvalidTokenException;
-import com.tasks.task_management.local.exceptions.PassedDueDateException;
-import com.tasks.task_management.local.exceptions.TaskNotFoundException;
+import com.tasks.task_management.utils.exceptions.InvalidTokenException;
+import com.tasks.task_management.utils.exceptions.PassedDueDateException;
+import com.tasks.task_management.utils.exceptions.TaskNotFoundException;
 import com.tasks.task_management.local.models.Notification;
 import com.tasks.task_management.local.models.Task;
 import com.tasks.task_management.local.repositories.TaskAssRepository;
 import com.tasks.task_management.local.repositories.TaskRepository;
-import com.tasks.task_management.remote.dto.TaskDto;
-import com.tasks.task_management.remote.utils.requests.Requests;
+import com.tasks.task_management.utils.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -110,11 +109,11 @@ public class TaskServiceImpl implements TaskService {
                         NotificationType.UNASSIGNED.name());
                 taskRepository.deleteById(taskId);
                 
-                if(!taskRepository.existsByUserId(task.getUserId())){
-                    if(!Requests.changeRole(token, UserSingleton.getInstance().getEmail(), "USER")) {
-                        throw new InvalidTokenException("Invalid token");
-                    }
-                }
+//                if(!taskRepository.existsByUserId(task.getUserId())){
+//                    if(!Requests.changeRole(token, UserSingleton.getInstance().getEmail(), "USER")) {
+//                        throw new InvalidTokenException("Invalid token");
+//                    }
+//                }
             }
             else {
                 throw new TaskNotFoundException("Task not found");

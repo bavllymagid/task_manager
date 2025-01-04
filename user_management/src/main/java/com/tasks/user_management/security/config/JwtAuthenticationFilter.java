@@ -3,7 +3,7 @@ package com.tasks.user_management.security.config;
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
 import com.tasks.user_management.local.models.UserRole;
-import com.tasks.user_management.services.RefreshTokenService;
+import com.tasks.user_management.remote.services.RefreshTokenService;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.security.jwt.JwtUtil;

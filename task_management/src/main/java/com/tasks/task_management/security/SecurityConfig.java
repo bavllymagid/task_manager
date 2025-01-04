@@ -1,6 +1,6 @@
 package com.tasks.task_management.security;
 
-import com.tasks.task_management.kafka.utils.PendingRequestManager;
+import com.tasks.task_management.remote.kafka.utils.PendingRequestManager;
 import com.tasks.task_management.local.StaticObjects.RolesConst;
 import com.tasks.task_management.security.authenticationProvider.TaskAccessDeniedHandler;
 import com.tasks.task_management.security.authenticationProvider.TaskAuthEntryPoint;
