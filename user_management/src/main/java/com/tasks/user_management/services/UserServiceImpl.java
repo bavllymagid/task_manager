@@ -1,14 +1,13 @@
 package com.tasks.user_management.services;
 
 import com.auth0.jwt.JWT;
-import com.tasks.user_management.kafka.producer.TopicsNames;
+import com.tasks.user_management.remote.kafka.payload.InvalidatingUserPayload;
+import com.tasks.user_management.remote.kafka.producer.TopicsNames;
 import com.tasks.user_management.local.models.RefreshToken;
 import com.tasks.user_management.local.models.User;
-import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.local.repositories.UserRolesRepository;
-import com.tasks.user_management.remote.requests.InvalidateUser;
 import com.tasks.user_management.utils.RolesConst;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
@@ -16,7 +15,6 @@ import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.LoginDto;
-import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -89,9 +87,7 @@ public class UserServiceImpl implements UserService{
         }
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.get());
         userRepository.updateSecretTokenByEmail(email, RandomStringUtils.randomAlphanumeric(12));
-        String token = jwtUtil.generateToken(user.get(), new Date(System.currentTimeMillis()+ 43200000), userRepository.findSecretTokenByEmail(email));
-//        kafkaTemplate.send(TopicsNames.USER_AUTHENTICATED.getTopicName(), new SendUserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(),
-//                user.get().getUserRoles().stream().map(UserRole::getName).toList()));
+        String token = jwtUtil.generateToken(user.get(), new Date(System.currentTimeMillis() + 43200000), userRepository.findSecretTokenByEmail(email));
         return new LoginDto(token, refreshToken.getRefreshToken(), user.get());
     }
 
@@ -102,10 +98,9 @@ public class UserServiceImpl implements UserService{
         if (user.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found.");
         }
-        if(InvalidateUser.deleteUser(token, user.get().getId()))
-            userRepository.deleteByEmail(email);
-        else throw new UserNotFoundException("User with email " + email + " not found.");
-        kafkaTemplate.send(TopicsNames.USER_DELETED.getTopicName(), new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), user.get().getPassword()));
+        kafkaTemplate.send(TopicsNames.USER_DELETED.getTopicName(), new InvalidatingUserPayload(String.valueOf(user.get().getId())));
+        userRepository.deleteByEmail(email);
+        refreshTokenRepository.deleteByUserEmail(email);
     }
 
     @Override
@@ -123,7 +118,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Page<UserDto> getListOfUsers(String token, int size, int page){
+    public Page<UserDto> getListOfUsers(String token, int size, int page) {
         Pageable pageable = Pageable.ofSize(size).withPage(page);
         Page<User> users = userRepository.findAllExceptCurrentUser(JWT.decode(token.substring(7)).getSubject(), pageable);
         return users.map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail(), ""));
@@ -140,11 +135,12 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void logoutUser(String token) throws TokenValidationException {
-            token = token.substring(7);
-            String email = JWT.decode(token).getSubject();
-            userRepository.updateSecretTokenByEmail(email, "");
-            refreshTokenRepository.deleteByUserEmail(email);
-            kafkaTemplate.send(TopicsNames.USER_LOGGED_OUT.getTopicName(),null);
+        token = token.substring(7);
+        String email = JWT.decode(token).getSubject();
+        userRepository.updateSecretTokenByEmail(email, "");
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new TokenValidationException("Invalid token."));
+        kafkaTemplate.send(TopicsNames.USER_LOGGED_OUT.getTopicName(), new InvalidatingUserPayload(String.valueOf(user.getId())));
+        refreshTokenRepository.deleteByUserEmail(email);
     }
 
     @Override
@@ -153,9 +149,9 @@ public class UserServiceImpl implements UserService{
         if (user.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found.");
         }
-        if(role.equalsIgnoreCase("user")){
+        if (role.equalsIgnoreCase("user")) {
             user.get().setUserRoles(new ArrayList<>(List.of(userRolesRepository.findByName(getRole(role)))));
-        }else {
+        } else {
             user.get().getUserRoles().add(userRolesRepository.findByName(getRole(role)));
         }
         userRepository.save(user.get());
@@ -164,7 +160,7 @@ public class UserServiceImpl implements UserService{
         return new UserDto(user.get().getId(), user.get().getUsername(), user.get().getEmail(), "");
     }
 
-    private String getRole(String role){
+    private String getRole(String role) {
         return switch (role.toUpperCase()) {
             case "ADMIN" -> RolesConst.ADMIN.name();
             case "MANAGER" -> RolesConst.MANAGER.name();

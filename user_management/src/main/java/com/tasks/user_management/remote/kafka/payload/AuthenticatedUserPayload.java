@@ -1,4 +1,4 @@
-package com.tasks.user_management.kafka.payload;
+package com.tasks.user_management.remote.kafka.payload;
 
 import com.tasks.user_management.utils.payload.SendUserDto;
 import org.json.JSONObject;

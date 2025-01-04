@@ -1,4 +1,4 @@
-package com.tasks.user_management.kafka.producer;
+package com.tasks.user_management.remote.kafka.producer;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

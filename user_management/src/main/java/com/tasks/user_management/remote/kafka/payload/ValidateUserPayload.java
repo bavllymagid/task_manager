@@ -1,4 +1,4 @@
-package com.tasks.user_management.kafka.payload;
+package com.tasks.user_management.remote.kafka.payload;
 
 import org.json.JSONObject;
 

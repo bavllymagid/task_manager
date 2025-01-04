@@ -1,4 +1,4 @@
-package com.tasks.user_management.kafka.consumer;
+package com.tasks.user_management.remote.kafka.consumer;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;

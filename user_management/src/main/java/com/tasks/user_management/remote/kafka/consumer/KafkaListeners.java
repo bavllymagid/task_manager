@@ -1,11 +1,10 @@
-package com.tasks.user_management.kafka.consumer;
+package com.tasks.user_management.remote.kafka.consumer;
 
-import com.tasks.user_management.kafka.payload.AuthenticatedUserPayload;
-import com.tasks.user_management.kafka.payload.ValidateUserPayload;
-import com.tasks.user_management.kafka.producer.TopicsNames;
+import com.tasks.user_management.remote.kafka.payload.AuthenticatedUserPayload;
+import com.tasks.user_management.remote.kafka.payload.ValidateUserPayload;
+import com.tasks.user_management.remote.kafka.producer.TopicsNames;
 import com.tasks.user_management.services.RefreshTokenService;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
-import com.tasks.user_management.utils.payload.SendUserDto;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;

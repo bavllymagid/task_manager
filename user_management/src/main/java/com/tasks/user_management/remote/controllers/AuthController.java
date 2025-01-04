@@ -1,7 +1,5 @@
 package com.tasks.user_management.remote.controllers;
 
-import com.tasks.user_management.local.models.UserRole;
-import com.tasks.user_management.remote.requests.SendUserInstance;
 import com.tasks.user_management.services.UserService;
 import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
@@ -9,7 +7,6 @@ import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.RoleChangeDto;
-import com.tasks.user_management.utils.payload.SendUserDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -19,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 
 @RestController
