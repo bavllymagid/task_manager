@@ -8,7 +8,7 @@ import com.tasks.user_management.local.repositories.RefreshTokenRepository;
 import com.tasks.user_management.local.repositories.UserRepository;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
-import com.tasks.user_management.utils.jwt.JwtUtil;
+import com.tasks.user_management.security.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.SendUserDto;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;

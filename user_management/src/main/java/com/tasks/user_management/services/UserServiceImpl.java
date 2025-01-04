@@ -13,7 +13,7 @@ import com.tasks.user_management.utils.exceptions.AuthenticationFailedException;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserAlreadyExistsException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
-import com.tasks.user_management.utils.jwt.JwtUtil;
+import com.tasks.user_management.security.jwt.JwtUtil;
 import com.tasks.user_management.utils.payload.LoginDto;
 import com.tasks.user_management.utils.payload.UserDto;
 import jakarta.transaction.Transactional;

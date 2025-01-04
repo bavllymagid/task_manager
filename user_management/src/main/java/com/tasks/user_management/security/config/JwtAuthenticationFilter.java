@@ -6,7 +6,7 @@ import com.tasks.user_management.local.models.UserRole;
 import com.tasks.user_management.services.RefreshTokenService;
 import com.tasks.user_management.utils.exceptions.TokenValidationException;
 import com.tasks.user_management.utils.exceptions.UserNotFoundException;
-import com.tasks.user_management.utils.jwt.JwtUtil;
+import com.tasks.user_management.security.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
